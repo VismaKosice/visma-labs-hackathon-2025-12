@@ -483,7 +483,7 @@ When the `SCHEME_REGISTRY_URL` environment variable is set, the engine must fetc
 - **Parallel I/O:** Multiple unique schemes → fetch them concurrently, not sequentially
 - **Connection pooling:** Reuse HTTP connections to the registry service
 
-**Note:** The testing client provides the mock registry service. Teams do not need to set up their own.
+**Note:** The testing client provides the mock registry service. Teams do not need to set up their own. Teams must implement their own client code to connect to the registry service.
 
 ### Bonus: `project_future_benefits` Mutation (5 points)
 
