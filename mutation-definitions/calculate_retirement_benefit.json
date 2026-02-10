@@ -2,7 +2,6 @@
   "name": "calculate_retirement_benefit",
   "description": "Calculate retirement benefits for a participant based on their employment history. This mutation validates retirement eligibility, calculates years of service, computes weighted average salary, applies the pension formula, and updates the dossier status to RETIRED.",
   "mutation_type": "DOSSIER",
-  "ordinal_rank": 5000,
   "json_schema": {
     "$schema": "https://json-schema.org/draft/2019-09/schema",
     "title": "calculate_retirement_benefit",

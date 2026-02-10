@@ -1,0 +1,28 @@
+{
+  "name": "apply_indexation",
+  "description": "Apply a percentage salary adjustment to all policies matching specified criteria. If no filtering criteria are provided, the indexation is applied to all policies in the dossier.",
+  "mutation_type": "DOSSIER",
+  "json_schema": {
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "title": "apply_indexation",
+    "type": "object",
+    "properties": {
+      "percentage": {
+        "description": "The percentage to adjust salaries by (e.g., 0.03 for a 3% increase, -0.05 for a 5% decrease).",
+        "type": "number",
+        "examples": [0.03, -0.05]
+      },
+      "scheme_id": {
+        "description": "Optional. If provided, only apply indexation to policies with this scheme_id. If omitted, apply to all policies.",
+        "type": "string"
+      },
+      "effective_before": {
+        "description": "Optional. If provided, only apply indexation to policies with employment_start_date before this date. If omitted, no date filtering is applied.",
+        "type": "string",
+        "format": "date"
+      }
+    },
+    "required": ["percentage"],
+    "additionalProperties": false
+  }
+}

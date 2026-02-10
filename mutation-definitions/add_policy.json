@@ -2,7 +2,6 @@
   "name": "add_policy",
   "description": "Adding a new policy to the Dossier.",
   "mutation_type": "DOSSIER",
-  "ordinal_rank": 1100,
   "json_schema": {
     "$schema": "https://json-schema.org/draft/2019-09/schema",
     "title": "add_policy",

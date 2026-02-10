@@ -1,0 +1,30 @@
+{
+  "name": "project_future_benefits",
+  "description": "Calculate projected pension benefits at multiple future dates without changing the dossier status. Adds projection results to each policy. This is a bonus mutation.",
+  "mutation_type": "DOSSIER",
+  "json_schema": {
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "title": "project_future_benefits",
+    "type": "object",
+    "properties": {
+      "projection_start_date": {
+        "description": "The start date for benefit projections.",
+        "type": "string",
+        "format": "date"
+      },
+      "projection_end_date": {
+        "description": "The end date for benefit projections.",
+        "type": "string",
+        "format": "date"
+      },
+      "projection_interval_months": {
+        "description": "The interval in months between projection points (e.g., 12 for yearly projections).",
+        "type": "integer",
+        "minimum": 1,
+        "examples": [6, 12]
+      }
+    },
+    "required": ["projection_start_date", "projection_end_date", "projection_interval_months"],
+    "additionalProperties": false
+  }
+}
