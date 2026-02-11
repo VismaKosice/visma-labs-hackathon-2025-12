@@ -102,7 +102,7 @@ Fairness Measures:
      memory, and load average in each team's JSON results for post-hoc comparison.
 
 Example:
-  $(basename "$0") --teams-file infrastructure/teams.json --output-dir ~/results
+  $(basename "$0") --teams-file organizer/infrastructure/teams.json --output-dir ~/results
 
 EOF
     exit 0

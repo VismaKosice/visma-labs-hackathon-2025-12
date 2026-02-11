@@ -166,7 +166,7 @@ These are directions, not prescriptions -- discovering the right approach is par
 
 **Problem:** Need an automated tool to test team submissions for correctness, measure performance, and calculate scores. Samples alone aren't sufficient.
 
-**Decision:** Created a comprehensive PRD at `testing-client/PRD.md` defining:
+**Decision:** Created a comprehensive PRD at `organizer/testing-client/PRD.md` defining:
 - TypeScript/Node.js stack with undici, autocannon, fast-json-patch, commander
 - CLI interface with parameters (--target, --suite, --team, --output, --cold-start-image, --code-path)
 - 10 correctness test scenarios with detailed validation rules
@@ -267,7 +267,7 @@ Performance aspects: caching (same scheme_id = same response), parallel I/O (mul
 
 **Problem:** Code Quality (5 pts) and Clean Mutation Architecture (4 pts) were originally scored by manual review. The user wanted to automate this.
 
-**Decision:** Created `testing-client/ai-code-review-prompt.md` with a structured AI prompt that scores:
+**Decision:** Created `organizer/testing-client/ai-code-review-prompt.md` with a structured AI prompt that scores:
 - Code Quality (5 pts): Readability & organization (2), error handling (1.5), project structure (1.5)
 - Clean Architecture (4 pts): Common interface (1), per-mutation implementation (1), generic dispatch (1), extensibility (1)
 
@@ -308,11 +308,11 @@ Result: **zero manual scoring items** -- everything is automated.
 **Files created:**
 - `.github/workflows/build-team.yml` -- CI pipeline
 - `SUBMISSION.md` -- team-facing submission guide
-- `infrastructure/README.md` -- Azure deployment guide
-- `infrastructure/setup-vm.sh` -- VM setup script
-- `infrastructure/run-all-teams.sh` -- test orchestrator
-- `infrastructure/create-team-branches.sh` -- branch creation script
-- `infrastructure/CHECKLIST.md` -- organizer pre/during/post hackathon checklist
+- `organizer/infrastructure/README.md` -- Azure deployment guide
+- `organizer/infrastructure/setup-vm.sh` -- VM setup script
+- `organizer/infrastructure/run-all-teams.sh` -- test orchestrator
+- `organizer/infrastructure/create-team-branches.sh` -- branch creation script
+- `organizer/infrastructure/CHECKLIST.md` -- organizer pre/during/post hackathon checklist
 - `.gitignore` -- standard ignores
 
 ---
@@ -401,7 +401,7 @@ Key verification points highlighted: salary after indexation (50000 * 1.03 = 515
 1. This repo becomes a **GitHub template repository**. It contains assignment docs, testing client, and infrastructure.
 2. Each team repo is created via `create-team-repos.sh` (uses `gh repo create --template`).
 3. Team repos start as full copies of the template (docs + API spec + mutation definitions).
-4. A **`infrastructure/teams.json`** config file maps team names to repo URLs.
+4. A **`organizer/infrastructure/teams.json`** config file maps team names to repo URLs.
 5. `run-all-teams.sh` reads `teams.json` instead of accepting `--repo-url` and `--teams` arguments.
 6. Teams push to `main` in their own repo (no branch juggling).
 
@@ -412,9 +412,9 @@ Key verification points highlighted: salary after indexation (50000 * 1.03 = 515
 - **No CI needed:** Docker images are built locally on the test VM from cloned source
 
 **Files changed:**
-- Deleted: `infrastructure/create-team-branches.sh`, `.github/workflows/build-team.yml`
-- Created: `infrastructure/create-team-repos.sh`, `infrastructure/teams.json`
-- Updated: `infrastructure/run-all-teams.sh`, `SUBMISSION.md`, `QUICK_START.md`, `INDEX.md`, `infrastructure/README.md`, `infrastructure/CHECKLIST.md`
+- Deleted: `organizer/infrastructure/create-team-branches.sh`, `.github/workflows/build-team.yml`
+- Created: `organizer/infrastructure/create-team-repos.sh`, `organizer/infrastructure/teams.json`
+- Updated: `organizer/infrastructure/run-all-teams.sh`, `SUBMISSION.md`, `QUICK_START.md`, `INDEX.md`, `organizer/infrastructure/README.md`, `organizer/infrastructure/CHECKLIST.md`
 
 ---
 

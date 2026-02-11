@@ -2,44 +2,75 @@
 
 This folder contains all materials needed for the Pension Calculation Engine - Visma Performance Hackathon.
 
-## Documentation Files
+## For Teams
 
-### Main Requirements
+Everything you need is at the **root level** of this repository. You can ignore the `organizer/` folder entirely.
+
+### Documentation
+
 - **`README.md`** - Complete requirements, mutation details, scoring system, and performance optimization guidance
 - **`QUICK_START.md`** - Quick reference guide and getting started checklist
 - **`SUBMISSION.md`** - How to submit your solution (repository setup, Dockerfile)
 
 ### Technical Specifications
+
 - **`api-spec.yaml`** - OpenAPI 3.0.0 specification for the `/calculation-requests` endpoint
 - **`data-model.md`** - Visual data model showing entity relationships and data structures
 
-## Mutation Definitions (Reference Examples)
+### Mutation Definitions (Reference Examples)
 
 The `mutation-definitions/` folder contains reference JSON schema examples for each mutation. These illustrate the structure and properties of each mutation.
 
-### Core Mutations
+#### Core Mutations
 1. **`create_dossier.json`** - Creates a new pension participant dossier
 2. **`add_policy.json`** - Adds a pension policy to an existing dossier
 3. **`apply_indexation.json`** - Applies percentage salary adjustment to matching policies
 4. **`calculate_retirement_benefit.json`** - Calculates retirement benefits
 
-### Bonus Mutations
+#### Bonus Mutations
 5. **`project_future_benefits.json`** - Projects pension benefits at future dates (bonus feature)
 
-## Testing Client
+### Reference Implementation
 
-- **`testing-client/PRD.md`** - Product requirements document for the testing client application (used by organizers to validate team submissions)
-- **`testing-client/ai-code-review-prompt.md`** - AI prompt for automated code quality and architecture scoring
+- **`PensionCalculationEngine/`** - A reference .NET implementation to help you understand the expected behavior. You are free to use any technology stack.
 
-## Infrastructure (Organizer-Only)
+---
 
-- **`infrastructure/DECISION_LOG.md`** - Complete decision log documenting all design decisions and rationale
-- **`infrastructure/CHECKLIST.md`** - Step-by-step organizer checklist (before, during, after the hackathon)
-- **`infrastructure/README.md`** - Azure deployment guide and test runner setup
-- **`infrastructure/setup-vm.sh`** - Automated VM setup script (Docker, Node.js, tools)
-- **`infrastructure/run-all-teams.sh`** - Test orchestrator that runs all teams sequentially
-- **`infrastructure/create-team-repos.sh`** - Creates team repositories from the template before the hackathon
-- **`infrastructure/teams.json`** - Team name to repository URL mapping (config file for test runner)
+## For Organizers
+
+All organizer-only materials are in the **`organizer/`** folder.
+
+### Guides
+
+- **`organizer/DRY_RUN_GUIDE.md`** - Manual dry run walkthrough (Azure, GitHub template, VM, tests)
+- **`organizer/STEP_BY_STEP_SETUP.md`** - Automated dry run using `run-dry-run.sh`
+- **`organizer/TESTING_GUIDE.md`** - VM sizing, full tests, multi-team testing tips
+
+### Scripts
+
+- **`organizer/run-dry-run.sh`** - One-click dry run (Azure + VM + team repo + tests)
+- **`organizer/prepare-submission.sh`** - Copies PensionCalculationEngine to a team repo for testing
+- **`organizer/verify-submission.sh`** - Validates submission has correct layout (Dockerfile, port 8080, etc.)
+
+### Infrastructure
+
+- **`organizer/infrastructure/README.md`** - Azure deployment guide and test runner setup
+- **`organizer/infrastructure/CHECKLIST.md`** - Step-by-step organizer checklist (before, during, after hackathon)
+- **`organizer/infrastructure/DECISION_LOG.md`** - Design decisions and rationale
+- **`organizer/infrastructure/setup-vm.sh`** - Automated VM setup script (Docker, Node.js, tools)
+- **`organizer/infrastructure/run-all-teams.sh`** - Test orchestrator that runs all teams sequentially
+- **`organizer/infrastructure/create-team-repos.sh`** - Creates team repositories from the template
+- **`organizer/infrastructure/create-team-branches.sh`** - Creates team branches
+- **`organizer/infrastructure/teams.json`** - Team name to repository URL mapping
+- **`organizer/infrastructure/teams-multiple-example.json`** - Example config with multiple teams
+
+### Testing Client
+
+- **`organizer/testing-client/`** - TypeScript test runner for correctness, performance, and bonus scoring
+- **`organizer/testing-client/PRD.md`** - Product requirements for the testing client
+- **`organizer/testing-client/ai-code-review-prompt.md`** - AI prompt for automated code quality scoring
+
+---
 
 ## File Structure
 
@@ -57,20 +88,38 @@ hackathon/
 │   ├── apply_indexation.json
 │   ├── calculate_retirement_benefit.json
 │   └── project_future_benefits.json
-├── testing-client/                    # Testing client (organizer tool)
-│   ├── PRD.md                         # Requirements for the testing client
-│   └── ai-code-review-prompt.md       # AI prompt for code quality scoring
-└── infrastructure/                    # Deployment & orchestration (organizer)
-    ├── DECISION_LOG.md                # Design decisions & rationale journal
-    ├── CHECKLIST.md                   # Organizer step-by-step checklist
-    ├── README.md                      # Azure deployment guide
-    ├── setup-vm.sh                    # VM setup script
-    ├── run-all-teams.sh               # Test orchestrator
-    ├── create-team-repos.sh           # Team repo creation script
-    └── teams.json                     # Team name → repo URL mapping
+├── PensionCalculationEngine/          # Reference .NET implementation
+│   ├── Controllers/
+│   ├── Models/
+│   ├── Services/
+│   ├── Dockerfile
+│   └── ...
+├── .github/workflows/build-team.yml   # CI pipeline
+└── organizer/                         # ⛔ Organizer-only (teams can ignore)
+    ├── DRY_RUN_GUIDE.md
+    ├── STEP_BY_STEP_SETUP.md
+    ├── TESTING_GUIDE.md
+    ├── run-dry-run.sh
+    ├── prepare-submission.sh
+    ├── verify-submission.sh
+    ├── infrastructure/
+    │   ├── CHECKLIST.md
+    │   ├── DECISION_LOG.md
+    │   ├── README.md
+    │   ├── setup-vm.sh
+    │   ├── run-all-teams.sh
+    │   ├── create-team-repos.sh
+    │   ├── create-team-branches.sh
+    │   ├── teams.json
+    │   └── teams-multiple-example.json
+    └── testing-client/
+        ├── src/
+        ├── fixtures/
+        ├── scripts/
+        └── package.json
 ```
 
-## Getting Started
+## Getting Started (Teams)
 
 1. Read **`SUBMISSION.md`** for how to clone and submit
 2. Start with **`README.md`** for complete requirements and scoring

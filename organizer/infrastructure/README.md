@@ -58,7 +58,7 @@ This document covers how to set up and run the hackathon testing infrastructure 
 - Azure CLI (`az`) installed and authenticated
 - GitHub CLI (`gh`) installed and authenticated (for creating team repos)
 - SSH access to Azure VMs
-- The testing client application built and ready (see `../testing-client/PRD.md`)
+- The testing client application built and ready (see `../testing-client/PRD.md` (i.e., `organizer/testing-client/PRD.md`))
 
 ## Step 1: Create Azure Resources
 
@@ -123,7 +123,7 @@ SSH into the VM and run the setup script:
 VM_IP=$(az vm show -d -g "$RESOURCE_GROUP" -n "$VM_NAME" --query publicIps -o tsv)
 
 # Copy setup script to VM
-scp infrastructure/setup-vm.sh hackathon@$VM_IP:~/
+scp organizer/infrastructure/setup-vm.sh hackathon@$VM_IP:~/
 
 # SSH in and run setup
 ssh hackathon@$VM_IP
@@ -138,7 +138,7 @@ az vm run-command invoke \
   --resource-group "$RESOURCE_GROUP" \
   --name "$VM_NAME" \
   --command-id RunShellScript \
-  --scripts @infrastructure/setup-vm.sh
+  --scripts @organizer/infrastructure/setup-vm.sh
 ```
 
 ## Step 3: Create Team Repositories
@@ -146,13 +146,13 @@ az vm run-command invoke \
 Before the hackathon, mark this repo as a **GitHub template** (Settings > General > Template repository) and create team repos:
 
 ```bash
-./infrastructure/create-team-repos.sh \
+./organizer/infrastructure/create-team-repos.sh \
   --template "<GITHUB_ORG>/hackathon-2025" \
   --org "<GITHUB_ORG>" \
   --teams "alpha,beta,gamma,delta"
 ```
 
-This creates one repo per team and updates `infrastructure/teams.json` with repo URLs.
+This creates one repo per team and updates `organizer/infrastructure/teams.json` with repo URLs.
 
 Give each team push access to their repo and share the URL.
 
@@ -162,14 +162,14 @@ On the VM:
 
 ```bash
 git clone https://github.com/<GITHUB_ORG>/hackathon-2025.git ~/hackathon
-cd ~/hackathon/testing-client
+cd ~/hackathon/organizer/testing-client
 npm install
 ```
 
 Copy the updated `teams.json` to the VM (if you edited it locally):
 
 ```bash
-scp infrastructure/teams.json hackathon@$VM_IP:~/hackathon/infrastructure/
+scp organizer/infrastructure/teams.json hackathon@$VM_IP:~/hackathon/organizer/infrastructure/
 ```
 
 Set the AI review API key:
@@ -190,10 +190,10 @@ ssh hackathon@$VM_IP
 
 # Run the orchestrator (reads teams.json, clones + builds + tests each team)
 cd ~/hackathon
-./infrastructure/run-all-teams.sh --output-dir ~/results
+./organizer/infrastructure/run-all-teams.sh --output-dir ~/results
 ```
 
-The script reads `infrastructure/teams.json` and for each team:
+The script reads `organizer/infrastructure/teams.json` and for each team:
 1. Clones the team's repository
 2. Builds the Docker image locally with `--no-cache`
 3. Starts the container with CPU/memory limits
@@ -214,7 +214,7 @@ docker build --no-cache -t hackathon-team-$TEAM:latest ~/repos/$TEAM
 docker run -d --name team-$TEAM --cpus="3.0" --memory="12g" -p 8080:8080 hackathon-team-$TEAM:latest
 
 # Run testing client
-cd ~/hackathon/testing-client
+cd ~/hackathon/organizer/testing-client
 npx ts-node src/index.ts \
   --target http://localhost:8080 \
   --team "$TEAM" \
@@ -232,7 +232,7 @@ docker rmi hackathon-team-$TEAM:latest
 After all teams have been tested individually, generate the leaderboard:
 
 ```bash
-cd ~/hackathon/testing-client
+cd ~/hackathon/organizer/testing-client
 npx ts-node src/index.ts --results-dir ~/results --leaderboard
 ```
 

@@ -11,17 +11,17 @@ A step-by-step checklist for preparing and running the Visma Performance Hackath
   - [ ] Push this repo to GitHub (if not already)
   - [ ] Enable "Template repository" in Settings > General
 - [ ] **Replace placeholders** in team-facing docs:
-  - [ ] `infrastructure/README.md`: replace `<GITHUB_ORG>` with actual value
-  - [ ] `infrastructure/setup-vm.sh`: replace `<GITHUB_ORG>` with actual value
-  - [ ] `infrastructure/teams.json`: replace `<GITHUB_ORG>` with actual value
+  - [ ] `organizer/infrastructure/README.md`: replace `<GITHUB_ORG>` with actual value
+  - [ ] `organizer/infrastructure/setup-vm.sh`: replace `<GITHUB_ORG>` with actual value
+  - [ ] `organizer/infrastructure/teams.json`: replace `<GITHUB_ORG>` with actual value
 - [ ] **Create team repositories** from the template:
   ```bash
-  ./infrastructure/create-team-repos.sh \
+  ./organizer/infrastructure/create-team-repos.sh \
     --template "<GITHUB_ORG>/hackathon-2025" \
     --org "<GITHUB_ORG>" \
     --teams "alpha,beta,gamma,delta"
   ```
-  - [ ] Verify `infrastructure/teams.json` was updated with repo URLs
+  - [ ] Verify `organizer/infrastructure/teams.json` was updated with repo URLs
   - [ ] Give each team push access to their repository
 - [ ] **Commit updated `teams.json`** to the template repo
 
@@ -29,7 +29,7 @@ A step-by-step checklist for preparing and running the Visma Performance Hackath
 
 ## 1 Week Before
 
-- [ ] **Build the testing client** from `testing-client/PRD.md`
+- [ ] **Build the testing client** from `organizer/testing-client/PRD.md`
   - [ ] All 10 correctness test fixtures created
   - [ ] Performance test scenarios defined
   - [ ] Bonus test scenarios (JSON Patch, project_future_benefits, Scheme Registry)
@@ -37,7 +37,7 @@ A step-by-step checklist for preparing and running the Visma Performance Hackath
   - [ ] AI code review integration working
   - [ ] Cold start test working with Docker
   - [ ] Leaderboard aggregation mode working
-- [ ] **Set up Azure VM** (see `infrastructure/README.md`):
+- [ ] **Set up Azure VM** (see `organizer/infrastructure/README.md`):
   ```bash
   # Create resource group + VM
   az group create --name hackathon-2025 --location westeurope
@@ -47,11 +47,11 @@ A step-by-step checklist for preparing and running the Visma Performance Hackath
   ```
   - [ ] SSH into VM and run setup script:
     ```bash
-    scp infrastructure/setup-vm.sh hackathon@<VM_IP>:~/
+    scp organizer/infrastructure/setup-vm.sh hackathon@<VM_IP>:~/
     ssh hackathon@<VM_IP> 'chmod +x ~/setup-vm.sh && ~/setup-vm.sh'
     ```
   - [ ] Clone hackathon repo to `~/hackathon`
-  - [ ] Copy `teams.json` to VM: `scp infrastructure/teams.json hackathon@<VM_IP>:~/hackathon/infrastructure/`
+  - [ ] Copy `teams.json` to VM: `scp organizer/infrastructure/teams.json hackathon@<VM_IP>:~/hackathon/infrastructure/`
   - [ ] Install testing client dependencies: `cd ~/hackathon/testing-client && npm install`
   - [ ] Set AI review API key: `export ANTHROPIC_API_KEY=...`
 
@@ -65,7 +65,7 @@ A step-by-step checklist for preparing and running the Visma Performance Hackath
   - [ ] On the Azure VM, run the full test suite:
     ```bash
     cd ~/hackathon
-    ./infrastructure/run-all-teams.sh --output-dir ~/results
+    ./organizer/infrastructure/run-all-teams.sh --output-dir ~/results
     ```
   - [ ] Verify the Docker image builds successfully on the VM
   - [ ] Verify correctness tests pass/fail as expected
@@ -106,7 +106,7 @@ A step-by-step checklist for preparing and running the Visma Performance Hackath
   ssh hackathon@$VM_IP
   cd ~/hackathon
   # The run script verifies access at startup, but you can also check manually:
-  jq -r '.[].repo_url' infrastructure/teams.json | while read url; do
+  jq -r '.[].repo_url' organizer/infrastructure/teams.json | while read url; do
     git ls-remote --heads "$url" > /dev/null 2>&1 && echo "OK: $url" || echo "FAIL: $url"
   done
   ```
@@ -120,7 +120,7 @@ A step-by-step checklist for preparing and running the Visma Performance Hackath
 - [ ] **Periodically check team progress:**
   ```bash
   # Check latest commit in each team repo
-  jq -r '.[] | "\(.name) \(.repo_url)"' infrastructure/teams.json | while read name url; do
+  jq -r '.[] | "\(.name) \(.repo_url)"' organizer/infrastructure/teams.json | while read name url; do
     echo "$name -- $(git ls-remote --heads "$url" | grep main | cut -f1 | head -c 7)"
   done
   ```
@@ -128,7 +128,7 @@ A step-by-step checklist for preparing and running the Visma Performance Hackath
   ```bash
   ssh hackathon@$VM_IP
   cd ~/hackathon
-  ./infrastructure/run-all-teams.sh \
+  ./organizer/infrastructure/run-all-teams.sh \
     --skip-cold-start \
     --skip-ai-review \
     --output-dir ~/results-interim
@@ -163,7 +163,7 @@ A step-by-step checklist for preparing and running the Visma Performance Hackath
 - [ ] **Run full test suite** for all teams (team order is randomized automatically):
   ```bash
   cd ~/hackathon
-  ./infrastructure/run-all-teams.sh --output-dir ~/results-final
+  ./organizer/infrastructure/run-all-teams.sh --output-dir ~/results-final
   ```
   The script will automatically:
   - Read team repos from `teams.json`
@@ -195,7 +195,7 @@ A step-by-step checklist for preparing and running the Visma Performance Hackath
   - AI code review spread > 2 points?
 - [ ] **Optional: re-run specific teams** if fairness concerns arise:
   - Edit `teams.json` to include only the teams to re-run
-  - Or use the manual single-team approach (see `infrastructure/README.md`, Option B)
+  - Or use the manual single-team approach (see `organizer/infrastructure/README.md`, Option B)
 - [ ] **Announce winners**
 
 ---
