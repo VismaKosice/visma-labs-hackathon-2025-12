@@ -12,6 +12,7 @@ export interface TestResults {
   bonus: BonusResults;
   code_quality: CodeQualityResults;
   total: TotalScore;
+  technology_stack?: string;
 }
 
 /**

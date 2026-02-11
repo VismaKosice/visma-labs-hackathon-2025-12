@@ -52,6 +52,7 @@ export function buildTestResults(
   performance: PerformanceResults,
   bonus: BonusResults,
   codeQuality: CodeQualityResults,
+  technologyStack?: string,
 ): TestResults {
   return {
     team,
@@ -63,5 +64,6 @@ export function buildTestResults(
     bonus,
     code_quality: codeQuality,
     total: calculateTotalScore(correctness, performance, bonus, codeQuality),
+    technology_stack: technologyStack,
   };
 }

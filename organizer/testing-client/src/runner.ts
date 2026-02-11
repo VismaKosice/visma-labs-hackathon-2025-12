@@ -134,11 +134,13 @@ export async function run(config: Config): Promise<void> {
     }
 
     // AI Code Review (scores both code quality and clean architecture)
+    let technologyStack: string | undefined;
     if (config.codePath) {
       const aiResult = await runAICodeReview(config);
       codeQuality = aiResult.codeQuality;
       bonus.clean_architecture = aiResult.cleanArchitecture;
       bonus.total += aiResult.cleanArchitecture.points;
+      technologyStack = aiResult.technologyStack;
     }
   }
 
@@ -151,6 +153,7 @@ export async function run(config: Config): Promise<void> {
     performance,
     bonus,
     codeQuality,
+    technologyStack,
   );
 
   printResults(results);

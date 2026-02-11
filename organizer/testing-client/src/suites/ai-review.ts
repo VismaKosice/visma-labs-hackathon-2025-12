@@ -70,7 +70,7 @@ interface AIReviewResponse {
  */
 export async function runAICodeReview(
   config: Config
-): Promise<{ codeQuality: CodeQualityResults; cleanArchitecture: CleanArchitectureResult }> {
+): Promise<{ codeQuality: CodeQualityResults; cleanArchitecture: CleanArchitectureResult; technologyStack?: string }> {
   if (!config.codePath) {
     console.log('  AI code review skipped (no --code-path provided)');
     return {
@@ -88,6 +88,7 @@ export async function runAICodeReview(
         extensibility: 0, 
         points: 0 
       },
+      technologyStack: undefined,
     };
   }
 
@@ -185,6 +186,7 @@ export async function runAICodeReview(
         extensibility: 0, 
         points: 0 
       },
+      technologyStack: undefined,
     };
   }
 
@@ -228,6 +230,7 @@ export async function runAICodeReview(
         extensibility: finalResult.clean_architecture.extensibility.rationale,
       },
     },
+    technologyStack: finalResult.language,
   };
 }
 
