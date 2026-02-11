@@ -1,6 +1,0 @@
-@PensionCalculationEngine_HostAddress = http://localhost:5064
-
-GET {{PensionCalculationEngine_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
