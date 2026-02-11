@@ -2,7 +2,6 @@
   "name": "create_dossier",
   "description": "Creation of the dossier for a participant.",
   "mutation_type": "DOSSIER_CREATION",
-  "ordinal_rank": 1000,
   "json_schema": {
     "$schema": "https://json-schema.org/draft/2019-09/schema",
     "title": "create_dossier",
@@ -11,16 +10,22 @@
       "dossier_id": {
         "description": "Identifier of the dossier within the Tenant. This will be used as the dossier_id in the situation.",
         "type": "string",
-        "minLength": 1,
-        "maxLength": 10,
-        "pattern": "^[A-Za-z0-9]+$",
+        "format": "uuid",
         "examples": [
-          "1010101002"
+          "550e8400-e29b-41d4-a716-446655440000"
         ]
       },
       "name": {
         "description": "Full name of the participant.",
         "type": "string"
+      },
+      "person_id": {
+        "description": "Identifier of the participant person. This will be used as the person_id in the situation.",
+        "type": "string",
+        "format": "uuid",
+        "examples": [
+          "660e8400-e29b-41d4-a716-446655440001"
+        ]
       },
       "birth_date": {
         "description": "The date of birth of the participant.",
@@ -28,7 +33,7 @@
         "format": "date"
       }
     },
-    "required": ["dossier_id", "name", "birth_date"],
+    "required": ["dossier_id", "person_id", "name", "birth_date"],
     "additionalProperties": false
   }
 }

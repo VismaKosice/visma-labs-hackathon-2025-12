@@ -1,65 +1,74 @@
 # Visma Performance Hackathon Materials Index
 
-This folder contains all materials needed for the Pension Calculation Engine - Visma Performance Hackathon.
+This repository contains all materials needed for the Pension Calculation Engine - Visma Performance Hackathon.
 
-## 📋 Documentation Files
+## Documentation
 
-### Main Requirements
-- **`README.md`** - Complete requirements document with all specifications, business rules, and evaluation criteria
+- **`README.md`** - Complete requirements, mutation details, scoring system, and performance optimization guidance
 - **`QUICK_START.md`** - Quick reference guide and getting started checklist
+- **`SUBMISSION.md`** - How to submit your solution (repository setup, Dockerfile)
 
-### Technical Specifications
+## Technical Specifications
+
 - **`api-spec.yaml`** - OpenAPI 3.0.0 specification for the `/calculation-requests` endpoint
 - **`data-model.md`** - Visual data model showing entity relationships and data structures
 
-## 🔧 Mutation Definitions (Reference Examples)
+## Mutation Definitions (Reference Examples)
 
-The `mutation-definitions/` folder contains reference JSON schema examples for each mutation. These are provided as examples to understand the mutation structure. **Note:** Mutations should be implemented as code in a separate assembly/module (see README.md for details).
+The `mutation-definitions/` folder contains reference JSON schema examples for each mutation. These illustrate the structure and properties of each mutation.
 
+### Core Mutations
 1. **`create_dossier.json`** - Creates a new pension participant dossier
 2. **`add_policy.json`** - Adds a pension policy to an existing dossier
-3. **`change_salary.json`** - Updates salary for a specific policy
-4. **`calculate_retirement_benefit.json`** - Complex mutation that calculates retirement benefits
+3. **`apply_indexation.json`** - Applies percentage salary adjustment to matching policies
+4. **`calculate_retirement_benefit.json`** - Calculates retirement benefits
 
-## 📝 File Structure
+### Bonus Mutations
+5. **`project_future_benefits.json`** - Projects pension benefits at future dates (bonus feature)
+
+## Reference Implementation
+
+- **`PensionCalculationEngine/`** - A reference .NET implementation to help you understand the expected behavior. You are free to use any technology stack.
+
+## File Structure
 
 ```
-hackathon/
 ├── README.md                          # Main requirements document
 ├── QUICK_START.md                     # Quick reference guide
+├── SUBMISSION.md                      # Submission instructions
 ├── INDEX.md                           # This file
 ├── api-spec.yaml                      # OpenAPI API specification
 ├── data-model.md                      # Data model documentation
-└── mutation-definitions/              # Mutation JSON schemas
-    ├── create_dossier.json
-    ├── add_policy.json
-    ├── change_salary.json
-    └── calculate_retirement_benefit.json
+├── mutation-definitions/              # Mutation JSON schemas
+│   ├── create_dossier.json
+│   ├── add_policy.json
+│   ├── apply_indexation.json
+│   ├── calculate_retirement_benefit.json
+│   └── project_future_benefits.json
+└── PensionCalculationEngine/          # Reference .NET implementation
+    ├── Controllers/
+    ├── Models/
+    ├── Services/
+    ├── Dockerfile
+    └── ...
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
-1. Start with **`README.md`** for complete requirements
-2. Review **`api-spec.yaml`** for API contract
-3. Understand the data model in **`data-model.md`**
-4. Review mutation definition examples in **`mutation-definitions/`** (reference for structure)
-5. Use **`QUICK_START.md`** as a quick reference during development
+1. Read **`SUBMISSION.md`** for how to clone and submit
+2. Start with **`README.md`** for complete requirements and scoring
+3. Review **`api-spec.yaml`** for API contract
+4. Understand the data model in **`data-model.md`**
+5. Review mutation definitions in **`mutation-definitions/`**
+6. Use **`QUICK_START.md`** as a quick reference during development
 
-## ⚠️ Important Notes
+## Important Notes
 
-- **Sample requests/responses** will be provided separately (TODO in README.md)
 - **Testing framework** will be provided by organizers
-- Focus on **performance optimization** - this is the primary evaluation criterion
+- Focus on **correctness first, then performance** -- this is how the scoring works
 - All code must be **Docker-deployable**
-
-## 📞 Support
-
-During the Visma Performance Hackathon, organizers will be available to answer questions about:
-- API specification clarifications
-- Business rule interpretations
-- Testing framework usage
+- Scoring: 40 pts correctness + 40 pts performance + 30 pts bonus + 5 pts code quality = **115 total**
 
 ---
 
-**Good luck at the Visma Performance Hackathon building your high-performance calculation engine!** 🎯
-
+**Good luck building your high-performance calculation engine!**

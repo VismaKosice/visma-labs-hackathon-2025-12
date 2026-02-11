@@ -2,20 +2,23 @@
 
 ## Event Overview
 
-**Event Name:** Visma Performance Hackathon  
-**Duration:** 1 day (8:00 AM - 6:00 PM)  
-**Team Size:** 2-3 people  
-**Focus:** Build a high-performance pension calculation engine that processes sequential mutations to calculate pension entitlements.
+**Event Name:** Visma Performance Hackathon
+**Date:** 11.02.2026
+**Duration:** 1 day (9:00 AM - 5:00 PM)
+**Team Size:** 1-3 people
+**Focus:** Build a high-performance pension calculation engine. Learn to write correct code first, then make it fast.
 
 ---
 
 ## Objective
 
-Design and implement a pension calculation engine that processes ordered sequences of mutations (operations) to calculate pension entitlements for participants. The engine must be **optimized for performance** while maintaining correctness and clean architecture.
+Design and implement a pension calculation engine that processes ordered sequences of mutations (operations) to calculate pension entitlements for participants. The engine must produce **correct results** and be **optimized for performance**.
 
 ---
 
 ## Core Requirements
+
+These are the mandatory requirements every team must implement.
 
 ### 1. API Endpoint
 
@@ -29,98 +32,360 @@ The complete API specification is provided in `api-spec.yaml` (OpenAPI 3.0.0 for
 
 ### 2. Mutation Processing
 
-The engine must process mutations **sequentially** in the order provided. Each mutation modifies the calculation state (situation), and the final state represents the calculated pension entitlements.
+The engine must process mutations **sequentially in array order**. Mutations in the request are pre-sorted by the caller. Each mutation modifies the calculation state (situation), and the final state represents the calculated pension entitlements.
+
+Each mutation consists of two steps:
+1. **Business validation** - Check if prerequisites are met (e.g., dossier exists, required fields present)
+2. **Calculation logic** - Apply the mutation's logic to modify the calculation state
 
 **Required Mutations:**
 
 1. **`create_dossier`** - Creates a new pension participant dossier
-2. **`add_policy`** - Adds a pension policy to an existing dossier (policy_id is auto-generated as `{dossier_id}-{sequence_number}`)
-3. **`change_salary`** - Updates salary for a specific policy
-4. **`calculate_retirement_benefit`** - Complex mutation that calculates retirement benefits (see details below)
+2. **`add_policy`** - Adds a pension policy to an existing dossier
+3. **`apply_indexation`** - Applies a percentage salary adjustment to matching policies
+4. **`calculate_retirement_benefit`** - Calculates retirement benefits based on employment history
 
-**Note:** The `policy_id` for policies is generated automatically by the system. The format is `{dossier_id}-{sequence_number}`, where sequence_number starts at 1 for the first policy and increments for each subsequent policy added to the dossier.
+See the [Mutation Details](#mutation-details) section for the complete specification of each mutation.
 
-### 3. Dynamic Mutation Support
+**Note:** The `policy_id` for policies is generated automatically by the engine. The format is `{dossier_id}-{sequence_number}`, where sequence_number starts at 1 for the first policy and increments for each subsequent policy added to the dossier.
 
-The application **MUST** support adding new mutations without requiring redeployment of the main calculation engine.
+**Note:** The `mutation-definitions/` folder contains reference JSON schema examples that illustrate the structure and properties of each mutation.
 
-**Requirements:**
-- Mutations must be defined as part of the application code, but **isolated from the main engine logic** (e.g., in a separate assembly, module, or package)
-- The mutation assembly/module must be deployable independently from the main calculation engine
-- The mutation assembly/module contains both:
-  1. **Mutation definitions**: Schema/metadata information about each mutation (property structure, validation rules, etc.)
-  2. **Business logic**: Implementation of each mutation consisting of two steps:
-     - **Business validation**: Check if prerequisites are met for the mutation (e.g., for `change_salary`, verify that the policy exists)
-     - **Calculation logic**: Apply the mutation's calculation logic to modify the calculation state
-- The main calculation engine must be implemented generically to discover and load mutations from the separate assembly/module
-- New mutations can be added by creating a new mutation implementation in the mutation assembly and deploying only that assembly (without redeploying the main engine)
-- The main engine must not contain hardcoded mutation types or mutation-specific logic
-
-**Implementation Considerations:**
-- The mutation assembly/module should be discoverable by the main engine (e.g., via dependency injection, plugin system, or module loading)
-- Mutation definitions and business logic should be co-located in the same assembly/module for each mutation
-- The main engine should provide a generic interface/contract that mutation implementations must follow
-- Consider caching mutation instances for performance
-- The application should handle invalid or missing mutation implementations gracefully
-- Teams are free to choose the architecture pattern (e.g., separate DLL/JAR/npm package, plugin system, etc.) that best fits their technology stack
-
-**Note:** The `mutation-definitions/` folder contains reference JSON schema examples that illustrate the structure and properties of each mutation. These are provided for reference only - mutations should be implemented as code in the mutation assembly/module, not loaded from JSON files.
-
-### 4. Data Model
+### 3. Data Model
 
 The calculation state (situation) contains:
 - **Dossier**: Participant information, status, retirement date
-- **Persons**: List of persons (participant, partner)
+- **Persons**: List of persons (participant)
 - **Policies**: List of pension policies with salary, part-time factor, and calculated benefits
 
 See `data-model.md` for a visual representation of the data model and relationships.
 
-### 5. Complex Mutation: `calculate_retirement_benefit`
+### 4. Response Format
 
-This mutation requires sophisticated business logic:
+The response must match the OpenAPI specification. Key requirements:
 
-**Purpose:** Calculate retirement benefits for a participant based on their employment history.
+- **`calculation_metadata`**: Includes a `calculation_id` (UUID v4) generated by the engine for each request, timing information (`calculation_started_at`, `calculation_completed_at`, `calculation_duration_ms`), and outcome (`SUCCESS`/`FAILURE`)
+- **`calculation_result`**:
+  - `messages`: Validation errors or warnings generated during processing
+  - `mutations`: List of processed mutations (original mutation object + `calculation_message_indexes`)
+  - `end_situation`: Final calculation state after all mutations
+  - `initial_situation`: Starting state (always `{ "dossier": null }`). The `actual_at` is set to the `actual_at` of the first mutation in the request.
 
-**Properties:**
+### 5. Error Handling
+
+- **CRITICAL** messages halt processing immediately. The calculation outcome is `FAILURE`. No further mutations are processed after the one that produced the CRITICAL error.
+- **WARNING** messages are recorded but processing continues normally.
+- Return HTTP `200` for all processed calculations (both SUCCESS and FAILURE outcomes).
+- Return HTTP `400` for malformed requests that cannot be processed at all.
+- Return HTTP `500` for unexpected server errors.
+
+**When CRITICAL halts processing:**
+- The `mutations` array includes all mutations up to and **including** the one that produced the CRITICAL error. Remaining mutations are omitted.
+- The `end_situation` reflects the state **before** the failing mutation was applied (since it did not complete). If the first mutation fails, `end_situation.situation` = `{ "dossier": null }`.
+- The `end_situation.mutation_id` and `end_situation.mutation_index` refer to the last **successfully applied** mutation. If no mutation was successfully applied, use the first mutation's ID and index 0.
+- The `end_situation.actual_at` follows the same rule: use the `actual_at` of the last successfully applied mutation, or the first mutation's `actual_at` if none succeeded.
+
+### 6. Docker Deployment
+
+The application must be deployable using Docker.
+
+**Requirements:**
+- Provide a `Dockerfile` in the repository root
+- Application must start and be accessible on port `8080` (configurable via `PORT` environment variable)
+- All required services must be containerized
+
+---
+
+## Complete Example
+
+A full request and expected response to help you verify your implementation.
+
+### Request
+
 ```json
 {
-  "dossier_id": "string",
-  "retirement_date": "date"
+  "tenant_id": "tenant-001",
+  "calculation_instructions": {
+    "mutations": [
+      {
+        "mutation_id": "a1111111-1111-1111-1111-111111111111",
+        "mutation_definition_name": "create_dossier",
+        "mutation_type": "DOSSIER_CREATION",
+        "actual_at": "2020-01-01",
+        "mutation_properties": {
+          "dossier_id": "d2222222-2222-2222-2222-222222222222",
+          "person_id": "p3333333-3333-3333-3333-333333333333",
+          "name": "Jane Doe",
+          "birth_date": "1960-06-15"
+        }
+      },
+      {
+        "mutation_id": "b4444444-4444-4444-4444-444444444444",
+        "mutation_definition_name": "add_policy",
+        "mutation_type": "DOSSIER",
+        "actual_at": "2020-01-01",
+        "dossier_id": "d2222222-2222-2222-2222-222222222222",
+        "mutation_properties": {
+          "scheme_id": "SCHEME-A",
+          "employment_start_date": "2000-01-01",
+          "salary": 50000,
+          "part_time_factor": 1.0
+        }
+      },
+      {
+        "mutation_id": "c5555555-5555-5555-5555-555555555555",
+        "mutation_definition_name": "apply_indexation",
+        "mutation_type": "DOSSIER",
+        "actual_at": "2021-01-01",
+        "dossier_id": "d2222222-2222-2222-2222-222222222222",
+        "mutation_properties": {
+          "percentage": 0.03
+        }
+      }
+    ]
+  }
 }
 ```
 
-**Business Rules:**
+### Expected Response (key fields)
 
-1. **Eligibility Validation:**
-   - Participant must be at least **65 years old** on the retirement date, OR
-   - Participant must have accumulated **40 or more years of service** across all policies
+```json
+{
+  "calculation_metadata": {
+    "calculation_id": "<engine-generated UUID>",
+    "tenant_id": "tenant-001",
+    "calculation_started_at": "<ISO timestamp>",
+    "calculation_completed_at": "<ISO timestamp>",
+    "calculation_duration_ms": "<number>",
+    "calculation_outcome": "SUCCESS"
+  },
+  "calculation_result": {
+    "messages": [],
+    "initial_situation": {
+      "actual_at": "2020-01-01",
+      "situation": {
+        "dossier": null
+      }
+    },
+    "mutations": [
+      {
+        "mutation": {
+          "mutation_id": "a1111111-1111-1111-1111-111111111111",
+          "mutation_definition_name": "create_dossier",
+          "mutation_type": "DOSSIER_CREATION",
+          "actual_at": "2020-01-01",
+          "mutation_properties": {
+            "dossier_id": "d2222222-2222-2222-2222-222222222222",
+            "person_id": "p3333333-3333-3333-3333-333333333333",
+            "name": "Jane Doe",
+            "birth_date": "1960-06-15"
+          }
+        }
+      },
+      {
+        "mutation": {
+          "mutation_id": "b4444444-4444-4444-4444-444444444444",
+          "mutation_definition_name": "add_policy",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2020-01-01",
+          "dossier_id": "d2222222-2222-2222-2222-222222222222",
+          "mutation_properties": {
+            "scheme_id": "SCHEME-A",
+            "employment_start_date": "2000-01-01",
+            "salary": 50000,
+            "part_time_factor": 1.0
+          }
+        }
+      },
+      {
+        "mutation": {
+          "mutation_id": "c5555555-5555-5555-5555-555555555555",
+          "mutation_definition_name": "apply_indexation",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2021-01-01",
+          "dossier_id": "d2222222-2222-2222-2222-222222222222",
+          "mutation_properties": {
+            "percentage": 0.03
+          }
+        }
+      }
+    ],
+    "end_situation": {
+      "mutation_id": "c5555555-5555-5555-5555-555555555555",
+      "mutation_index": 2,
+      "actual_at": "2021-01-01",
+      "situation": {
+        "dossier": {
+          "dossier_id": "d2222222-2222-2222-2222-222222222222",
+          "status": "ACTIVE",
+          "retirement_date": null,
+          "persons": [
+            {
+              "person_id": "p3333333-3333-3333-3333-333333333333",
+              "role": "PARTICIPANT",
+              "name": "Jane Doe",
+              "birth_date": "1960-06-15"
+            }
+          ],
+          "policies": [
+            {
+              "policy_id": "d2222222-2222-2222-2222-222222222222-1",
+              "scheme_id": "SCHEME-A",
+              "employment_start_date": "2000-01-01",
+              "salary": 51500,
+              "part_time_factor": 1.0,
+              "attainable_pension": null,
+              "projections": null
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+```
 
-2. **Years of Service Calculation:**
-   - Calculate total years of service from all active policies
-   - For each policy: years = (retirement_date - employment_start_date) in years
-   - Sum all years across policies (accounting for overlapping periods if needed)
+**Key things to verify:**
+- `salary` after 3% indexation: `50000 * 1.03 = 51500`
+- `policy_id` format: `{dossier_id}-1`
+- `initial_situation.situation.dossier` is `null` (no dossier before first mutation)
+- `end_situation.mutation_index` is `2` (0-based, last mutation)
+- `messages` is empty (no validation errors in this scenario)
 
-3. **Average Salary Calculation:**
-   - Calculate weighted average salary across all policies
-   - Weight each policy's salary by its years of service
-   - Formula: `weighted_avg = Σ(salary_i * years_i) / Σ(years_i)`
-   - Adjust for part-time factor: `effective_salary = salary * part_time_factor`
+---
 
-4. **Pension Benefit Calculation:**
-   - Apply pension formula: `annual_pension = average_salary * years_of_service * 0.02`
-   - The factor `0.02` represents 2% per year of service
-   - Distribute the annual pension across policies proportionally based on years of service
+## Mutation Details
 
-5. **State Updates:**
+### `create_dossier`
+
+**Type:** `DOSSIER_CREATION`
+**Purpose:** Creates a new pension participant dossier with the participant's personal information.
+
+**Properties:**
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `dossier_id` | string (UUID) | Yes | Unique identifier for the dossier |
+| `person_id` | string (UUID) | Yes | Unique identifier for the participant |
+| `name` | string | Yes | Full name of the participant |
+| `birth_date` | date | Yes | Date of birth of the participant |
+
+**Validation:**
+| Check | Code | Level | Condition |
+|---|---|---|---|
+| Dossier already exists | `DOSSIER_ALREADY_EXISTS` | CRITICAL | A dossier already exists in the situation |
+| Invalid birth_date | `INVALID_BIRTH_DATE` | CRITICAL | `birth_date` is not a valid date or is in the future |
+| Empty name | `INVALID_NAME` | CRITICAL | `name` is empty or blank |
+
+**Application:**
+- Create dossier with `status` = `"ACTIVE"`, `retirement_date` = `null`
+- Create person with `role` = `"PARTICIPANT"` using provided `person_id`, `name`, `birth_date`
+- Initialize empty `policies` array
+
+---
+
+### `add_policy`
+
+**Type:** `DOSSIER`
+**Purpose:** Adds a pension policy to an existing dossier. Each policy represents a pension scheme tied to an employment period.
+
+**Properties:**
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `scheme_id` | string | Yes | Identifier of the pension scheme |
+| `employment_start_date` | date | Yes | Start date of employment for this policy |
+| `salary` | number | Yes | Annual full-time salary |
+| `part_time_factor` | number (0-1) | Yes | Part-time employment factor (1.0 = full-time) |
+
+**Validation:**
+| Check | Code | Level | Condition |
+|---|---|---|---|
+| Dossier does not exist | `DOSSIER_NOT_FOUND` | CRITICAL | No dossier in the situation |
+| Invalid salary | `INVALID_SALARY` | CRITICAL | `salary` < 0 |
+| Invalid part_time_factor | `INVALID_PART_TIME_FACTOR` | CRITICAL | `part_time_factor` < 0 or > 1 |
+| Duplicate policy | `DUPLICATE_POLICY` | WARNING | A policy with the same `scheme_id` AND same `employment_start_date` already exists |
+
+**Application:**
+- Generate `policy_id` as `{dossier_id}-{sequence_number}` (sequence starts at 1, increments per policy added)
+- Add policy with provided fields, `attainable_pension` = `null`, `projections` = `null`
+
+**Performance note:** With many `add_policy` mutations in a request, duplicate detection becomes a hot path. Data structure choice matters here.
+
+---
+
+### `apply_indexation`
+
+**Type:** `DOSSIER`
+**Purpose:** Applies a percentage salary adjustment to all policies matching the specified criteria. If no filtering criteria are provided, the indexation applies to all policies.
+
+**Properties:**
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `percentage` | number | Yes | Percentage adjustment (e.g., `0.03` for +3%, `-0.05` for -5%) |
+| `scheme_id` | string | No | If provided, only apply to policies with this `scheme_id` |
+| `effective_before` | date | No | If provided, only apply to policies with `employment_start_date` before this date |
+
+**Validation:**
+| Check | Code | Level | Condition |
+|---|---|---|---|
+| Dossier does not exist | `DOSSIER_NOT_FOUND` | CRITICAL | No dossier in the situation |
+| No policies exist | `NO_POLICIES` | CRITICAL | Dossier has no policies |
+| No matching policies | `NO_MATCHING_POLICIES` | WARNING | Filters were provided but no policies match the criteria |
+| Resulting salary negative | `NEGATIVE_SALARY_CLAMPED` | WARNING | After applying the percentage, one or more salaries would be negative. Salary is clamped to 0. |
+
+**Application:**
+- Filter policies by criteria:
+  - If `scheme_id` provided: only policies where `policy.scheme_id == scheme_id`
+  - If `effective_before` provided: only policies where `policy.employment_start_date < effective_before`
+  - Both filters are combined with AND logic if both provided
+- For each matching policy: `new_salary = salary * (1 + percentage)`
+- If `new_salary < 0`, clamp to `0` and produce a WARNING
+- Update salary on each matching policy
+
+**Performance note:** This mutation tests batch operations and efficient filtering. With many policies and many indexation mutations, naive implementations (scan all policies each time) are measurably slower than indexed approaches.
+
+---
+
+### `calculate_retirement_benefit`
+
+**Type:** `DOSSIER`
+**Purpose:** Calculates retirement benefits for a participant based on their employment history. This is the most computation-heavy mutation.
+
+**Properties:**
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `retirement_date` | date | Yes | The date on which the participant retires |
+
+**Validation:**
+| Check | Code | Level | Condition |
+|---|---|---|---|
+| Dossier does not exist | `DOSSIER_NOT_FOUND` | CRITICAL | No dossier in the situation |
+| No policies exist | `NO_POLICIES` | CRITICAL | Dossier has no policies |
+| Not eligible | `NOT_ELIGIBLE` | CRITICAL | Participant is under 65 years old on retirement_date AND total years of service < 40 |
+| Retirement before employment | `RETIREMENT_BEFORE_EMPLOYMENT` | WARNING | `retirement_date` is before any policy's `employment_start_date` (one warning per violating policy) |
+
+**Application:**
+
+1. **Years of service** (per policy):
+   `years = max(0, days_between(employment_start_date, retirement_date) / 365.25)`
+   If `retirement_date` is before a policy's `employment_start_date`, years of service for that policy is `0` (the RETIREMENT_BEFORE_EMPLOYMENT warning is produced, but the policy still participates in the calculation with 0 years).
+
+2. **Effective salary** (per policy):
+   `effective_salary = salary * part_time_factor`
+
+3. **Weighted average salary** (across all policies):
+   `weighted_avg = Σ(effective_salary_i * years_i) / Σ(years_i)`
+
+4. **Annual pension**:
+   `annual_pension = weighted_avg * total_years * accrual_rate`
+   where `accrual_rate` = `0.02` by default, or the value from the Scheme Registry if the bonus integration is implemented (see [External Scheme Registry Integration](#bonus-external-scheme-registry-integration-5-points))
+
+5. **Distribution** (per policy, proportional by years of service):
+   `policy_pension = annual_pension * (policy_years / total_years)`
+
+6. **State updates:**
    - Set dossier `status` to `"RETIRED"`
-   - Set dossier `retirement_date` to the provided retirement date
-   - Update each policy's `attainable_pension` field with the calculated portion
-
-**Validation Errors:**
-- If participant is under 65 AND has less than 40 years of service → CRITICAL error
-- If dossier does not exist → CRITICAL error
-- If no policies exist → CRITICAL error
-- If retirement_date is before any policy's employment_start_date → WARNING
+   - Set dossier `retirement_date` to the provided date
+   - Set each policy's `attainable_pension` to its calculated portion
 
 **Example Calculation:**
 ```
@@ -133,12 +398,14 @@ Years of service:
 - Policy 2: 15 years
 Total: 40 years
 
-Average salary (weighted):
-- Policy 1: 50000 * 1.0 * 25 = 1,250,000
-- Policy 2: 60000 * 0.8 * 15 = 720,000
-- Total weighted: 1,970,000
-- Total years: 40
-- Average: 49,250
+Effective salaries:
+- Policy 1: 50000 * 1.0 = 50000
+- Policy 2: 60000 * 0.8 = 48000
+
+Weighted average salary:
+- (50000 * 25 + 48000 * 15) / (25 + 15)
+- (1,250,000 + 720,000) / 40
+- 1,970,000 / 40 = 49,250
 
 Annual pension: 49,250 * 40 * 0.02 = 39,400
 
@@ -147,86 +414,225 @@ Distribution:
 - Policy 2: 39,400 * (15/40) = 14,775
 ```
 
-### 6. Performance Requirements
-
-**Optimize for performance!** The testing framework will measure:
-
-1. **Calculation Time:** Time to process a single calculation request
-2. **Parallel Processing:** Ability to handle multiple concurrent requests
-3. **Throughput:** Total number of requests processed in a given time period
-
-Teams will be compared primarily on performance metrics, but code quality and architecture will also be evaluated.
-
-### 7. Docker Deployment
-
-The application must be deployable using Docker. All dependencies (databases, caches, etc.) must be included in the Dockerfile or docker-compose setup.
-
-**Requirements:**
-- Provide a `Dockerfile` in the repository root
-- Application must start and be accessible on port `8080` (configurable via environment variable)
-- All required services (databases, message queues, etc.) must be containerized
-
-**Example Dockerfile structure:**
-```dockerfile
-FROM [your-base-image]
-WORKDIR /app
-COPY . .
-RUN [build-commands]
-EXPOSE 8080
-CMD [start-command]
-```
-
-### 8. Response Format
-
-The response must match the OpenAPI specification exactly. Key requirements:
-
-- Include `calculation_metadata` with timing information
-- Include `calculation_result` with:
-  - `messages`: Any validation errors or warnings (English only)
-  - `mutations`: List of processed mutations with **mandatory JSON Patch documents**
-  - `end_situation`: Final calculation state
-  - `initial_situation`: Starting state (always empty situation with dossier: null)
-
-**JSON Patch Generation (Mandatory):**
-- JSON Patch documents are **required** for all mutations
-- Each mutation must include:
-  - `forward_patch_to_situation_after_this_mutation`: Patch from previous situation to situation after this mutation
-  - `backward_patch_to_previous_situation`: Patch from situation after this mutation back to previous situation
-- JSON Patch format follows RFC 6902
-- **Performance Note:** Efficient JSON Patch generation is a key performance optimization opportunity
-
-### 9. Error Handling
-
-- Return appropriate HTTP status codes (200, 400, 500)
-- Include validation messages in the response for invalid requests
-- Message levels: CRITICAL (fatal error, halts processing) or WARNING (allows processing to continue)
+**Performance note:** Per-policy calculations are independent and can be parallelized. Multiple passes over the policy array can be collapsed into a single pass. Date arithmetic can be done efficiently or naively -- the choice matters at scale.
 
 ---
 
-## Evaluation Criteria
+## Bonus Features
 
-Teams will be evaluated on:
+These are optional features that earn extra points. Implement them after the core requirements are working and optimized.
 
-1. **Performance (Primary Focus):**
-   - Calculation time per request
-   - Ability to process requests in parallel
-   - Overall throughput
+### Bonus: Forward JSON Patch (7 points)
 
-2. **Code Quality:**
-   - Clean, readable code
-   - Proper error handling
-   - Code organization and structure
+Each processed mutation in the response includes `forward_patch_to_situation_after_this_mutation` -- an RFC 6902 JSON Patch document that transforms the previous situation into the situation after this mutation.
 
-3. **Architecture:**
-   - Design patterns and principles
-   - Scalability considerations
-   - Maintainability
-   - Dynamic mutation support (ability to add new mutations without redeploying the main engine)
+**Criteria:**
+- Patch present for every mutation
+- Valid RFC 6902 format
+- Applying the patch to the previous situation produces an exact match with the actual situation after the mutation
 
-4. **Correctness:**
-   - All business requirements met
-   - Mutations applied correctly
-   - Calculation results accurate
+### Bonus: Backward JSON Patch (4 points)
+
+Each processed mutation also includes `backward_patch_to_previous_situation` -- the reverse patch. Requires Forward JSON Patch to be implemented first.
+
+**Criteria:**
+- Applying the backward patch to the situation after the mutation reproduces the previous situation exactly
+
+### Bonus: Clean Mutation Architecture (4 points)
+
+Mutations implement a common interface/contract, and the engine dispatches generically.
+
+**Criteria:**
+- A common mutation interface exists (e.g., interface, abstract class, trait)
+- Each mutation implements it with its own validation and application logic
+- The engine resolves mutations by name via a registry/map/DI -- no `if/else` or `switch` on mutation names
+- Adding a new mutation would only require: implementing the interface + registering it
+
+### Bonus: Cold Start Performance (5 points)
+
+Time from `docker run` to first successful HTTP response.
+
+**Scoring (tiered):**
+| Cold Start Time | Points |
+|---|---|
+| < 500ms | 5 |
+| 500ms - 1s | 3 |
+| 1s - 3s | 1 |
+| > 3s | 0 |
+
+### Bonus: External Scheme Registry Integration (5 points)
+
+When the `SCHEME_REGISTRY_URL` environment variable is set, the engine must fetch scheme-specific parameters from an external service instead of using hardcoded values.
+
+**How it works:**
+- For each `calculate_retirement_benefit` mutation, for each **unique `scheme_id`** among the dossier's policies, call:
+  `GET {SCHEME_REGISTRY_URL}/schemes/{scheme_id}`
+- The service responds (with a constant ~50ms delay) with:
+  ```json
+  { "scheme_id": "SCHEME-001", "accrual_rate": 0.025 }
+  ```
+- Use the returned `accrual_rate` in the pension formula instead of the hardcoded `0.02`
+- When `SCHEME_REGISTRY_URL` is **not set**, use the hardcoded accrual rate of `0.02` (core tests are unaffected)
+
+**Criteria:**
+- Calculation results use the accrual rate from the registry (verified by different expected values in bonus tests)
+- Engine handles the external service gracefully (timeout after 2s, treat as unavailable and fall back to default `0.02`)
+
+**Performance aspects tested:**
+- **Caching:** Same `scheme_id` across multiple requests → cache the result instead of calling every time
+- **Parallel I/O:** Multiple unique schemes → fetch them concurrently, not sequentially
+- **Connection pooling:** Reuse HTTP connections to the registry service
+
+**Note:** The testing client provides the mock registry service. Teams do not need to set up their own. Teams must implement their own client code to connect to the registry service.
+
+### Bonus: `project_future_benefits` Mutation (5 points)
+
+Implement the bonus mutation that projects pension benefits at multiple future dates.
+
+**Type:** `DOSSIER`
+**Purpose:** For each projection date (from `projection_start_date` to `projection_end_date`, stepping by `projection_interval_months`), calculate what the pension would be if the participant retired on that date. Results are stored in each policy's `projections` array. The dossier status is **not** changed.
+
+**Properties:**
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `projection_start_date` | date | Yes | Start date for projections |
+| `projection_end_date` | date | Yes | End date for projections |
+| `projection_interval_months` | integer | Yes | Months between projection points (e.g., 12 for yearly) |
+
+**Validation:**
+| Check | Code | Level | Condition |
+|---|---|---|---|
+| Dossier does not exist | `DOSSIER_NOT_FOUND` | CRITICAL | No dossier in the situation |
+| No policies exist | `NO_POLICIES` | CRITICAL | Dossier has no policies |
+| Invalid date range | `INVALID_DATE_RANGE` | CRITICAL | `projection_end_date` <= `projection_start_date` |
+| Projection before employment | `PROJECTION_BEFORE_EMPLOYMENT` | WARNING | `projection_start_date` is before any policy's `employment_start_date` |
+
+**Application:**
+- For each projection date from start to end, inclusive (stepping by `projection_interval_months`):
+  - For each policy: calculate projected pension using the same formula as `calculate_retirement_benefit` (using the projection date as the retirement date), **but skip the eligibility check** (age >= 65 OR years >= 40). Projections are hypothetical -- they show what the pension *would be*, not whether the participant *is eligible*.
+  - Add `{ "date": projection_date, "projected_pension": amount }` to each policy's `projections` array
+
+**Performance note:** This mutation generates many calculations (N projection dates * M policies). Naive implementations recalculate everything from scratch for each date. The performant approach recognizes that most intermediate values are reusable across projection dates -- only the years-of-service delta changes. Caching and memoization make a significant difference.
+
+---
+
+## Scoring System
+
+Teams are scored on a total of **115 points**.
+
+### Correctness -- 40 points
+
+Automated test scenarios that validate response structure and calculation results.
+
+> **Note:** All scenarios implicitly include `create_dossier` as the first mutation (since nothing can happen without a dossier). The scenario labels indicate the mutation(s) being **tested**, not the complete mutation list.
+
+| Test Scenario | Points |
+|---|---|
+| `create_dossier` only | 4 |
+| `create_dossier` + `add_policy` (single) | 4 |
+| `create_dossier` + `add_policy` (multiple policies) | 4 |
+| `apply_indexation` (no filters) | 4 |
+| `apply_indexation` with `scheme_id` filter | 3 |
+| `apply_indexation` with `effective_before` filter | 3 |
+| Full flow: create + policies + indexation + retirement | 6 |
+| Multiple policies with different part-time factors + retirement | 6 |
+| Error: retirement without eligibility | 3 |
+| Error: mutation without dossier | 3 |
+
+**Scoring:** Binary pass/fail per scenario. Full points if the response matches expected output, 0 if not.
+
+### Performance -- 40 points
+
+Measured **only on test scenarios that pass correctness**. If you fail a correctness test, you get 0 performance points for that category.
+
+| Category | Points | How it's measured |
+|---|---|---|
+| Single request latency (simple) | 10 | Average response time for simple scenarios (1-3 mutations). Relative scaling. |
+| Single request latency (complex) | 10 | Average response time for complex scenarios (10+ mutations). Relative scaling. |
+| Throughput | 10 | Max sustained requests/second over 30 seconds. Relative scaling. |
+| Concurrency | 10 | Performance under parallel load (50 concurrent requests). Relative scaling. |
+
+**Relative scoring formula:**
+- For latency: `your_points = max_points * (fastest_time / your_time)`
+- For throughput: `your_points = max_points * (your_throughput / best_throughput)`
+
+### Bonus Features -- 30 points
+
+| Feature | Points | Verified by |
+|---|---|---|
+| Forward JSON Patch | 7 | Automated |
+| Backward JSON Patch | 4 | Automated |
+| Clean Mutation Architecture | 4 | AI code review |
+| Cold Start Performance | 5 | Automated (tiered) |
+| External Scheme Registry Integration | 5 | Automated |
+| `project_future_benefits` mutation | 5 | Automated |
+
+### Code Quality -- 5 points (AI code review)
+
+| Aspect | Points |
+|---|---|
+| Code readability and organization | 2 |
+| Error handling quality | 1.5 |
+| Project structure and build setup | 1.5 |
+
+**How it works:** An AI model reviews your source code and scores each aspect using a standardized prompt. The review is run 3 times per submission, and the median score is taken for each aspect. The AI does **not** assess correctness or performance (those are scored by automated tools).
+
+**Note:** Scoring breakdown may be adjusted before the event. Final scoring criteria will be confirmed at kickoff.
+
+---
+
+## Performance Optimization Areas
+
+Here are the key areas where performance optimizations make a difference. These are directions, not prescriptions -- discovering the right approach is part of the challenge.
+
+1. **Parallelism vs. Sequential Processing** - Some parts of request handling can be done in parallel (e.g., input validation, mutation property parsing), while mutations must be applied sequentially. Within a mutation, independent per-policy calculations can be parallelized.
+
+2. **Data Structure Choice** - How you store and query policies affects lookup and filtering performance. Linear scans vs. indexed structures matter when mutation counts are high.
+
+3. **Batch Operations** - `apply_indexation` updates many policies at once. Naive one-by-one processing vs. batch approaches yield different performance profiles.
+
+4. **Serialization / Deserialization** - JSON parsing and generation is often the largest time cost. Library choice, streaming vs. buffered parsing, and avoiding intermediate representations all matter.
+
+5. **Memory Allocation** - Reducing garbage collection pressure through object reuse, pre-allocation, and avoiding unnecessary deep copies of the situation between mutations.
+
+6. **Concurrency Model** - How your server handles multiple requests in parallel (thread pools, async/await, event loops) directly impacts throughput and concurrency scores.
+
+7. **State Management** - Immutable snapshots vs. mutable state with change tracking. Directly impacts JSON Patch generation strategy if you attempt the bonus.
+
+8. **External Service I/O** - (Bonus) If integrating with the Scheme Registry, how you handle outbound HTTP calls matters. Sequential calls block the request; parallel calls, connection pooling, and caching reduce the overhead to near-zero.
+
+---
+
+## Performance Reference Tiers
+
+Rough reference points to help calibrate your optimization efforts. These are not scoring thresholds -- actual scoring is relative (team vs. team).
+
+### Simple Request (3 mutations)
+
+| Tier | Latency |
+|---|---|
+| Excellent | < 1ms |
+| Good | 1-5ms |
+| Acceptable | 5-20ms |
+| Slow | > 20ms |
+
+### Complex Request (10+ mutations)
+
+| Tier | Latency |
+|---|---|
+| Excellent | < 5ms |
+| Good | 5-15ms |
+| Acceptable | 15-50ms |
+| Slow | > 50ms |
+
+### Throughput (sustained, single container)
+
+| Tier | Requests/sec |
+|---|---|
+| Excellent | > 10,000 |
+| Good | 2,000-10,000 |
+| Acceptable | 500-2,000 |
+| Slow | < 500 |
 
 ---
 
@@ -234,93 +640,80 @@ Teams will be evaluated on:
 
 A testing framework will be provided that:
 
-1. **Validates Business Requirements:**
-   - Verifies mutations are applied correctly
-   - Checks calculation results match expected outcomes
-   - Validates response structure matches OpenAPI spec
+1. **Validates Correctness:** Verifies mutations produce correct results, validates response structure against the OpenAPI spec
+2. **Measures Performance:** Single request latency, throughput, concurrency handling
+3. **Checks Bonus Features:** Forward/backward JSON Patch correctness, `project_future_benefits` output
 
-2. **Measures Performance:**
-   - Single request calculation time
-   - Parallel request processing capability
-   - Throughput under load
-
-3. **Test Scenarios:**
-   - Simple calculations (1-3 mutations)
-   - Complex calculations (10+ mutations)
-   - Concurrent request handling
-   - Error scenarios
+**Test scenarios include:**
+- Simple calculations (1-3 mutations)
+- Complex calculations (10+ mutations with multiple policies, indexations, and retirement)
+- Concurrent request handling
+- Error scenarios (missing dossier, ineligible retirement, etc.)
 
 ---
 
 ## Deliverables
 
-Teams must provide:
+1. **Source Code Repository** with complete application code and `Dockerfile`
+2. **Application must be runnable** via `docker build` + `docker run`
+3. **Must accept requests** on `POST /calculation-requests` on port 8080
+4. **Must respond** according to the OpenAPI specification
 
-1. **Source Code Repository:**
-   - Complete application code
-   - Dockerfile for deployment
-   - README with setup instructions (if needed)
-
-2. **Deployment Ready:**
-   - Application must be runnable via Docker
-   - Must accept requests on the specified endpoint
-   - Must respond according to the OpenAPI specification
-
-**Note:** No documentation, presentations, or demos are required. Focus on the code and performance.
+No documentation, presentations, or demos are required. Focus entirely on the code and performance.
 
 ---
 
 ## Technology Stack
 
-**No restrictions!** Teams are free to choose:
-- Programming language (Java, C#, Python, Node.js, Go, Rust, etc.)
-- Frameworks and libraries
-- Databases (if needed)
-- Caching solutions
-- Any other tools or technologies
+**No restrictions.** Teams are free to choose any programming language, framework, libraries, or tools.
 
 **Only requirement:** Must be deployable via Docker.
 
 ---
 
-## Sample Requests & Responses
-
-**TODO:** Sample calculation requests with expected responses will be provided separately. These will include:
-- Simple calculation examples (1-3 mutations)
-- Complex calculation examples (10+ mutations)
-- Expected response structures for validation
-
-For now, refer to the OpenAPI specification (`api-spec.yaml`) for request/response structure examples.
-
----
-
 ## Timeline
 
-- **8:00 AM:** Kickoff and requirements review
-- **8:30 AM - 5:30 PM:** Development time
-- **5:30 PM - 6:00 PM:** Final testing and submission
-- **6:00 PM:** Code submission deadline
+| Time | Activity |
+|---|---|
+| 9:00 AM | Kickoff and requirements review |
+| 9:00 AM - 4:30 PM | Development time |
+| 4:30 PM - 5:00 PM | Final testing and submission |
+| 5:00 PM | Code submission deadline |
 
----
-
-## Questions & Support
-
-During the event, organizers will be available to answer questions about:
-- API specification clarifications
-- Business rule interpretations
-- Testing framework usage
+**Suggested approach:**
+1. Get a correct, working solution first (target: first 3-4 hours)
+2. Optimize for performance (target: next 2-3 hours)
+3. Implement bonus features if time permits
 
 ---
 
 ## Getting Started
 
-1. Review the OpenAPI specification (`api-spec.yaml`)
-2. Review the data model (`data-model.md`)
-3. Set up your development environment
-4. Start implementing the calculation engine
-5. Focus on performance optimization
-6. Test with the provided testing framework
-7. Submit your solution
+1. Read this document (you're doing it now)
+2. Review the API specification (`api-spec.yaml`)
+3. Review the data model (`data-model.md`)
+4. Review mutation definitions in `mutation-definitions/` for property schemas
+5. Set up your development environment
+6. Implement the core requirements
+7. Optimize for performance
+8. Attempt bonus features if time permits
+9. Submit your solution
+
+---
+
+## Questions & Support
+
+During the event, organizers will be available for:
+- API specification clarifications
+- Business rule interpretations
+- Testing framework usage
+
+## Numeric Precision
+
+- **Years of service:** Calculated as `days_between(start, end) / 365.25`. Use this formula consistently.
+- **Monetary values:** All monetary results (salary after indexation, attainable_pension, projected_pension) are decimal numbers. No specific rounding is required.
+- **Testing tolerance:** The testing framework compares numeric values with a tolerance of **0.01**. Minor floating-point differences will not cause test failures.
+
+---
 
 **Good luck and have fun building a high-performance calculation engine!**
-
