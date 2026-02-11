@@ -266,7 +266,81 @@ cd ~/hackathon/organizer/testing-client
 npx ts-node src/index.ts --results-dir ~/results --leaderboard
 ```
 
-## Step 6: Upload Results (Optional)
+## Step 6: Live Leaderboard
+
+The leaderboard system provides a live web UI that updates automatically as teams submit code.
+
+### Architecture
+
+```
+continuous-test.sh (polls GitHub for new commits)
+  │
+  ├─→ Detects new commit on team's main branch
+  ├─→ Clones repo, builds Docker image, runs tests
+  ├─→ Writes team-<name>.json + leaderboard.json
+  │
+serve.sh (HTTP server on port 3000/80)
+  │
+  └─→ Serves index.html + leaderboard.json
+        │
+        └─→ Browser auto-refreshes every 15s
+```
+
+### Quick Start (Demo Mode)
+
+Preview the leaderboard with demo data:
+
+```bash
+cd ~/hackathon/organizer/leaderboard
+./serve.sh
+# Open http://localhost:3000
+```
+
+### Production Setup (Hackathon Day)
+
+1. **Start the continuous tester** (in a tmux/screen session):
+
+```bash
+# Start continuous polling — tests teams on new commits, regenerates leaderboard
+./organizer/infrastructure/continuous-test.sh \
+  --output-dir ~/results \
+  --poll-interval 120 \
+  --skip-ai-review
+```
+
+2. **Start the leaderboard server** (in another session):
+
+```bash
+./organizer/leaderboard/serve.sh --results ~/results --port 80
+# Leaderboard is now at http://<VM_IP>/
+```
+
+3. **Share the URL** with teams: `http://<VM_IP>/`
+
+### Continuous Tester Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--poll-interval` | 120s | How often to check for new commits |
+| `--run-once` | off | Run one cycle and exit (useful for cron) |
+| `--cooldown` | 5s | Pause between team tests |
+| `--skip-ai-review` | off | Skip AI code review (faster) |
+| `--skip-cold-start` | off | Skip cold start test |
+
+The tester tracks which commit was last tested per team (in `_commit_tracking.json`).
+Teams can push code at any time — only new commits trigger a re-test.
+
+### Manual Leaderboard Regeneration
+
+If you need to regenerate the leaderboard from existing result files:
+
+```bash
+cd ~/hackathon/organizer/testing-client
+npx ts-node src/index.ts --results-dir ~/results --leaderboard
+# This writes ~/results/leaderboard.json
+```
+
+## Step 7: Upload Results (Optional)
 
 ```bash
 # Upload all result files to Blob Storage
@@ -280,7 +354,7 @@ for file in ~/results/*.json; do
 done
 ```
 
-## Estimated Costs
+## Step 8: Estimated Costs
 
 | Resource | SKU | Cost/hour | Notes |
 |---|---|---|---|

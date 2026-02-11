@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visma Performance Hackathon — Submissions</title>
+<style>
+  :root {
+    --bg-primary: #0f1117;
+    --bg-secondary: #1a1d27;
+    --bg-card: #222632;
+    --bg-hover: #2a2e3c;
+    --bg-expanded: #1e2230;
+    --border: #2e3345;
+    --text-primary: #e8eaf0;
+    --text-secondary: #8b90a0;
+    --text-muted: #5a5f73;
+    --accent: #4f8cff;
+    --accent-bg: rgba(79, 140, 255, 0.12);
+    --gold: #ffd700;
+    --green: #34d399;
+    --green-bg: rgba(52, 211, 153, 0.12);
+    --red: #f87171;
+    --red-bg: rgba(248, 113, 113, 0.12);
+    --orange: #fb923c;
+    --orange-bg: rgba(251, 146, 60, 0.12);
+    --purple: #a78bfa;
+    --bar-bg: #2a2e3c;
+    --bar-correctness: #34d399;
+    --bar-performance: #4f8cff;
+    --bar-bonus: #fb923c;
+    --bar-quality: #a78bfa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header-title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .nav-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .nav-link:hover { background: var(--accent-bg); }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+  }
+  .status-dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.offline { background: var(--red); }
+
+  /* Container */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .team-filter-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .filter-pill {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .filter-pill:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+  }
+
+  .filter-pill.active {
+    background: var(--accent-bg);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .filter-pill .count {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-left: 4px;
+  }
+
+  /* Summary stats */
+  .summary-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .summary-stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    min-width: 120px;
+  }
+
+  .summary-stat .label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .summary-stat .value {
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  /* Submissions list */
+  .submissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .submission-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+    cursor: pointer;
+  }
+
+  .submission-card:hover {
+    border-color: #3d4460;
+  }
+
+  .submission-main {
+    display: grid;
+    grid-template-columns: 180px 1fr 100px;
+    padding: 14px 20px;
+    align-items: center;
+    gap: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .submission-main {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+  }
+
+  .submission-team {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .submission-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  .commit-badge {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 11px;
+    background: var(--bg-card);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+
+  .submission-scores {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .mini-score {
+    text-align: center;
+  }
+
+  .mini-score .val {
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mini-score .lbl {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .mini-bar {
+    width: 40px;
+    height: 3px;
+    background: var(--bar-bg);
+    border-radius: 2px;
+    margin: 2px auto 0;
+    overflow: hidden;
+  }
+
+  .mini-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  .submission-total {
+    text-align: right;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .submission-total.has-error {
+    color: var(--red);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* Error indicator */
+  .error-pill {
+    display: inline-block;
+    background: var(--red-bg);
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* Improvement indicator */
+  .change-indicator {
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 4px;
+  }
+  .change-up { color: var(--green); }
+  .change-down { color: var(--red); }
+  .change-same { color: var(--text-muted); }
+
+  /* Expand icon */
+  .expand-icon {
+    font-size: 10px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+    float: right;
+    margin-top: 4px;
+  }
+
+  .submission-card.expanded .expand-icon { transform: rotate(180deg); }
+
+  /* Expanded details */
+  .submission-details {
+    display: none;
+    padding: 0 20px 20px;
+    background: var(--bg-expanded);
+    border-top: 1px solid var(--border);
+  }
+
+  .submission-card.expanded .submission-details { display: block; }
+
+  .details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .details-grid { grid-template-columns: 1fr; }
+  }
+
+  .detail-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .detail-section h4 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 13px;
+  }
+
+  .detail-row .label { color: var(--text-secondary); }
+  .detail-row .value { font-weight: 500; font-variant-numeric: tabular-nums; }
+  .detail-row .pass { color: var(--green); }
+  .detail-row .fail { color: var(--red); }
+
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 6px;
+  }
+
+  .scenario-chip {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .scenario-chip.pass { background: var(--green-bg); color: var(--green); }
+  .scenario-chip.fail { background: var(--red-bg); color: var(--red); }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-secondary);
+  }
+
+  .empty-state h2 {
+    font-size: 20px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .pulse {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* Timeline connector */
+  .submission-card::before {
+    content: '';
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <svg viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:32px">
+      <text x="0" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="700" fill="#e8eaf0">visma</text>
+    </svg>
+    <div>
+      <div class="header-title">Submissions</div>
+      <div class="header-subtitle">All test runs, filterable by team</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <a href="index.html" class="nav-link">&larr; Leaderboard</a>
+    <span id="status-indicator">
+      <span class="status-dot offline"></span>
+      <span id="status-text">Connecting...</span>
+    </span>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <span class="filter-label">Filter by team:</span>
+    <div class="team-filter-pills" id="team-filters">
+      <!-- Generated dynamically -->
+    </div>
+  </div>
+
+  <!-- Summary row -->
+  <div class="summary-row" id="summary-row">
+    <div class="summary-stat">
+      <div class="label">Total Submissions</div>
+      <div class="value" id="stat-total">--</div>
+    </div>
+    <div class="summary-stat">
+      <div class="label">Teams</div>
+      <div class="value" id="stat-teams">--</div>
+    </div>
+    <div class="summary-stat">
+      <div class="label">Latest</div>
+      <div class="value" id="stat-latest">--</div>
+    </div>
+    <div class="summary-stat">
+      <div class="label">Best Score</div>
+      <div class="value" id="stat-best">--</div>
+    </div>
+  </div>
+
+  <!-- Submissions -->
+  <div class="submissions-list" id="submissions-list">
+    <div class="empty-state">
+      <div style="font-size:48px;margin-bottom:16px;opacity:0.4" class="pulse">&#128220;</div>
+      <h2>Waiting for submissions...</h2>
+      <p style="font-size:14px;max-width:400px;margin:0 auto">Submissions will appear here as teams push code and tests complete.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const REFRESH_INTERVAL_MS = 15000;
+  const DATA_URL = getDataUrl();
+  let activeTeamFilter = null; // null = show all
+  let allData = null;
+
+  function getDataUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const base = params.get('results') || '.';
+    return base.replace(/\/$/, '') + '/submissions.json';
+  }
+
+  // ── Data fetching ──────────────────────────────────────────────
+
+  async function fetchSubmissions() {
+    try {
+      const resp = await fetch(DATA_URL + '?t=' + Date.now());
+      if (!resp.ok) {
+        setStatus('offline', 'No data yet');
+        return null;
+      }
+      const data = await resp.json();
+      setStatus('live', 'Live');
+      return data;
+    } catch (e) {
+      setStatus('offline', 'Offline');
+      return null;
+    }
+  }
+
+  function setStatus(state, text) {
+    const dot = document.querySelector('#status-indicator .status-dot');
+    dot.className = 'status-dot ' + state;
+    document.getElementById('status-text').textContent = text;
+  }
+
+  // ── Check URL for team filter ──────────────────────────────────
+
+  function getInitialFilter() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('team') || null;
+  }
+
+  // ── Rendering ──────────────────────────────────────────────────
+
+  function render(data) {
+    if (!data || !data.submissions || data.submissions.length === 0) {
+      return;
+    }
+
+    allData = data;
+    renderFilters(data);
+    renderFiltered(data);
+  }
+
+  function renderFilters(data) {
+    const teamCounts = {};
+    for (const sub of data.submissions) {
+      teamCounts[sub.team] = (teamCounts[sub.team] || 0) + 1;
+    }
+
+    const teams = Object.keys(teamCounts).sort();
+    const container = document.getElementById('team-filters');
+
+    let html = `<span class="filter-pill ${!activeTeamFilter ? 'active' : ''}" data-team=""
+      onclick="setFilter(null)">All <span class="count">${data.submissions.length}</span></span>`;
+
+    for (const team of teams) {
+      const isActive = activeTeamFilter === team;
+      html += `<span class="filter-pill ${isActive ? 'active' : ''}" data-team="${esc(team)}"
+        onclick="setFilter('${esc(team)}')">${esc(team)} <span class="count">${teamCounts[team]}</span></span>`;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function renderFiltered(data) {
+    // Sort submissions: newest first
+    let subs = [...data.submissions].reverse();
+
+    if (activeTeamFilter) {
+      subs = subs.filter(s => s.team === activeTeamFilter);
+    }
+
+    // Summary stats
+    const uniqueTeams = new Set(subs.map(s => s.team));
+    const bestScore = subs.length > 0 ? Math.max(...subs.map(s => s.total_score)) : 0;
+    const latestTime = subs.length > 0 ? new Date(subs[0].timestamp) : null;
+
+    document.getElementById('stat-total').textContent = subs.length;
+    document.getElementById('stat-teams').textContent = uniqueTeams.size;
+    document.getElementById('stat-latest').textContent = latestTime ? formatRelative(latestTime) : '--';
+    document.getElementById('stat-best').textContent = bestScore > 0 ? bestScore.toFixed(1) : '--';
+
+    // Build previous scores map (per team) for change indicators
+    const prevScoreMap = buildPrevScoreMap(data.submissions);
+
+    // Render list
+    const list = document.getElementById('submissions-list');
+
+    if (subs.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div style="font-size:48px;margin-bottom:16px;opacity:0.4">&#128269;</div>
+          <h2>No submissions found</h2>
+          <p style="font-size:14px;color:var(--text-secondary)">No submissions match the current filter.</p>
+        </div>`;
+      return;
+    }
+
+    let html = '';
+
+    for (let i = 0; i < subs.length; i++) {
+      const sub = subs[i];
+      const hasError = !!sub.error;
+      const prevScore = prevScoreMap[sub.team + ':' + sub.timestamp];
+
+      html += `<div class="submission-card" onclick="toggleCard(this)">`;
+      html += `<div class="submission-main">`;
+
+      // Team + meta
+      html += `<div>
+        <div class="submission-team">${esc(sub.team)}</div>
+        <div class="submission-meta">
+          <span>${formatDateTime(new Date(sub.timestamp))}</span>
+          ${sub.commit_sha && sub.commit_sha !== 'unknown'
+            ? `<span class="commit-badge">${esc(sub.commit_sha.substring(0, 8))}</span>`
+            : ''}
+        </div>
+      </div>`;
+
+      // Scores
+      if (!hasError) {
+        html += `<div class="submission-scores">`;
+        html += miniScore(sub.correctness, 40, 'Correct', 'var(--bar-correctness)');
+        html += miniScore(sub.performance, 40, 'Perf', 'var(--bar-performance)');
+        html += miniScore(sub.bonus, 30, 'Bonus', 'var(--bar-bonus)');
+        html += miniScore(sub.code_quality, 5, 'Quality', 'var(--bar-quality)');
+        html += `</div>`;
+      } else {
+        html += `<div><span class="error-pill">${esc(sub.error)}</span></div>`;
+      }
+
+      // Total
+      if (hasError) {
+        html += `<div class="submission-total has-error">Failed <span class="expand-icon">&#9660;</span></div>`;
+      } else {
+        const changeHtml = prevScore !== null ? changeIndicator(sub.total_score, prevScore) : '';
+        html += `<div class="submission-total">${sub.total_score.toFixed(1)}${changeHtml} <span class="expand-icon">&#9660;</span></div>`;
+      }
+
+      html += `</div>`; // submission-main
+
+      // Details (hidden until expanded)
+      html += `<div class="submission-details">`;
+      if (sub.details && !hasError) {
+        html += renderDetails(sub.details);
+      } else if (hasError) {
+        html += `<div style="padding:16px;color:var(--red);font-size:14px">${esc(sub.error)}</div>`;
+      }
+      html += `</div>`;
+
+      html += `</div>`; // submission-card
+    }
+
+    list.innerHTML = html;
+  }
+
+  function miniScore(value, max, label, color) {
+    const pct = max > 0 ? (value / max * 100) : 0;
+    return `<div class="mini-score">
+      <div class="val">${value.toFixed(label === 'Quality' ? 1 : 0)}</div>
+      <div class="lbl">${label}</div>
+      <div class="mini-bar"><div class="mini-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }
+
+  function buildPrevScoreMap(submissions) {
+    // For each submission, find the previous submission by the same team
+    const map = {};
+    const teamLastScore = {};
+
+    for (const sub of submissions) {
+      const key = sub.team + ':' + sub.timestamp;
+      if (teamLastScore[sub.team] !== undefined) {
+        map[key] = teamLastScore[sub.team];
+      } else {
+        map[key] = null;
+      }
+      teamLastScore[sub.team] = sub.total_score;
+    }
+    return map;
+  }
+
+  function changeIndicator(current, previous) {
+    const diff = current - previous;
+    if (Math.abs(diff) < 0.05) {
+      return '<span class="change-indicator change-same">=</span>';
+    } else if (diff > 0) {
+      return `<span class="change-indicator change-up">&#9650;+${diff.toFixed(1)}</span>`;
+    } else {
+      return `<span class="change-indicator change-down">&#9660;${diff.toFixed(1)}</span>`;
+    }
+  }
+
+  function renderDetails(detail) {
+    let html = '<div class="details-grid">';
+
+    // Correctness scenarios
+    if (detail.correctness?.scenarios?.length > 0) {
+      html += `<div class="detail-section">
+        <h4>Correctness Scenarios (${detail.correctness.total}/${detail.correctness.max})</h4>
+        <div class="scenario-grid">`;
+      for (const s of detail.correctness.scenarios) {
+        const cls = s.passed ? 'pass' : 'fail';
+        const title = s.name + (s.errors?.length ? '\n' + s.errors.join('\n') : '');
+        html += `<div class="scenario-chip ${cls}" title="${esc(title)}">${esc(s.id)} ${s.passed ? '&#10003;' : '&#10007;'} ${s.points}/${s.max_points}</div>`;
+      }
+      html += `</div></div>`;
+    }
+
+    // Performance
+    html += `<div class="detail-section"><h4>Performance</h4>`;
+    if (detail.performance?.simple_latency) {
+      html += detailRow('Simple Latency (mean)', fmtMs(detail.performance.simple_latency.mean_ms));
+      html += detailRow('Simple Latency (p95)', fmtMs(detail.performance.simple_latency.p95_ms));
+    }
+    if (detail.performance?.complex_latency) {
+      html += detailRow('Complex Latency (mean)', fmtMs(detail.performance.complex_latency.mean_ms));
+      html += detailRow('Complex Latency (p95)', fmtMs(detail.performance.complex_latency.p95_ms));
+    }
+    if (detail.performance?.throughput) {
+      html += detailRow('Throughput', fmtNum(detail.performance.throughput.requests_per_second) + ' req/s');
+    }
+    if (detail.performance?.concurrency) {
+      html += detailRow('Concurrency (mean)', fmtMs(detail.performance.concurrency.mean_ms));
+    }
+    if (detail.performance?.relative_scores) {
+      const rs = detail.performance.relative_scores;
+      html += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">`;
+      html += detailRow('Simple Score', rs.simple_latency_score.toFixed(1) + '/10');
+      html += detailRow('Complex Score', rs.complex_latency_score.toFixed(1) + '/10');
+      html += detailRow('Throughput Score', rs.throughput_score.toFixed(1) + '/10');
+      html += detailRow('Concurrency Score', rs.concurrency_score.toFixed(1) + '/10');
+      html += `</div>`;
+    }
+    if (!detail.performance?.simple_latency && !detail.performance?.complex_latency) {
+      html += `<div class="detail-row"><span class="label" style="color:var(--text-muted)">No performance data</span></div>`;
+    }
+    html += `</div>`;
+
+    // Bonus
+    html += `<div class="detail-section"><h4>Bonus Features (${detail.bonus.total}/${detail.bonus.max})</h4>`;
+    html += bonusRow('Forward JSON Patch', detail.bonus.forward_json_patch);
+    html += bonusRow('Backward JSON Patch', detail.bonus.backward_json_patch);
+    if (detail.bonus.project_future_benefits) {
+      html += bonusRow('Future Benefits', detail.bonus.project_future_benefits);
+    }
+    if (detail.bonus.scheme_registry) {
+      html += bonusRow('Scheme Registry', detail.bonus.scheme_registry);
+    }
+    if (detail.bonus.cold_start) {
+      const cs = detail.bonus.cold_start;
+      html += detailRow('Cold Start', cs.time_ms != null ? fmtMs(cs.time_ms) + ` (${cs.points} pts)` : 'N/A');
+    }
+    if (detail.bonus.clean_architecture) {
+      html += detailRow('Clean Architecture', detail.bonus.clean_architecture.points + ' pts');
+    }
+    html += `</div>`;
+
+    // Code Quality
+    html += `<div class="detail-section"><h4>Code Quality (${detail.code_quality.points.toFixed(1)}/5)</h4>`;
+    if (detail.code_quality.skipped) {
+      html += `<div class="detail-row"><span class="label" style="color:var(--text-muted)">AI review was skipped</span></div>`;
+    } else {
+      html += detailRow('Readability', detail.code_quality.readability_and_organization.toFixed(1) + '/2');
+      html += detailRow('Error Handling', detail.code_quality.error_handling.toFixed(1) + '/1.5');
+      html += detailRow('Project Structure', detail.code_quality.project_structure.toFixed(1) + '/1.5');
+    }
+    html += `</div>`;
+
+    html += '</div>';
+    return html;
+  }
+
+  function detailRow(label, value) {
+    return `<div class="detail-row"><span class="label">${label}</span><span class="value">${value}</span></div>`;
+  }
+
+  function bonusRow(label, result) {
+    if (!result) return '';
+    const cls = result.passed ? 'pass' : 'fail';
+    const icon = result.passed ? '&#10003;' : '&#10007;';
+    return `<div class="detail-row"><span class="label">${label}</span><span class="value ${cls}">${icon} ${result.points} pts</span></div>`;
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────
+
+  function esc(s) {
+    if (s == null) return '';
+    const d = document.createElement('div');
+    d.textContent = String(s);
+    return d.innerHTML;
+  }
+
+  function fmtMs(ms) {
+    if (ms == null) return 'N/A';
+    if (ms < 1) return ms.toFixed(3) + ' ms';
+    if (ms < 100) return ms.toFixed(2) + ' ms';
+    if (ms < 1000) return ms.toFixed(1) + ' ms';
+    return (ms / 1000).toFixed(2) + ' s';
+  }
+
+  function fmtNum(n) {
+    if (n == null) return 'N/A';
+    return n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  }
+
+  function formatDateTime(d) {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+           d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+
+  function formatRelative(d) {
+    const now = new Date();
+    const diffMs = now - d;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffSec < 60) return 'just now';
+    if (diffMin < 60) return diffMin + 'm ago';
+    if (diffHr < 24) return diffHr + 'h ago';
+    return formatDateTime(d);
+  }
+
+  // ── Global handlers ────────────────────────────────────────────
+
+  window.toggleCard = function(card) {
+    card.classList.toggle('expanded');
+  };
+
+  window.setFilter = function(team) {
+    activeTeamFilter = team;
+    // Update URL without reload
+    const url = new URL(window.location);
+    if (team) {
+      url.searchParams.set('team', team);
+    } else {
+      url.searchParams.delete('team');
+    }
+    history.replaceState(null, '', url);
+    if (allData) {
+      renderFilters(allData);
+      renderFiltered(allData);
+    }
+  };
+
+  // ── Main loop ──────────────────────────────────────────────────
+
+  async function poll() {
+    const data = await fetchSubmissions();
+    if (data) {
+      render(data);
+    }
+  }
+
+  async function init() {
+    activeTeamFilter = getInitialFilter();
+    await poll();
+    setInterval(poll, REFRESH_INTERVAL_MS);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

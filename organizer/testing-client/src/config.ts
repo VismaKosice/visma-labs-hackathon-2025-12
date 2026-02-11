@@ -18,6 +18,7 @@ export interface Config {
   concurrencyLevel: number;
   resultsDir?: string;
   leaderboard: boolean;
+  commitSha?: string;
 }
 
 export function parseConfig(argv?: string[]): Config {
@@ -38,7 +39,8 @@ export function parseConfig(argv?: string[]): Config {
     .option('--throughput-duration <seconds>', 'Duration in seconds for throughput test', '15')
     .option('--concurrency-level <count>', 'Number of concurrent connections for concurrency test', '50')
     .option('--results-dir <path>', 'Directory with JSON result files for leaderboard scoring')
-    .option('--leaderboard', 'Calculate and display multi-team leaderboard', false);
+    .option('--leaderboard', 'Calculate and display multi-team leaderboard', false)
+    .option('--commit-sha <sha>', 'Git commit SHA being tested (recorded in submissions history)');
 
   if (argv) {
     program.parse(argv, { from: 'user' });
@@ -94,5 +96,6 @@ export function parseConfig(argv?: string[]): Config {
     concurrencyLevel,
     resultsDir: opts.resultsDir,
     leaderboard: opts.leaderboard,
+    commitSha: opts.commitSha,
   };
 }

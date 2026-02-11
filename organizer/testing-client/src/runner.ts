@@ -15,7 +15,7 @@ import { runAICodeReview } from './suites/ai-review';
 import { buildTestResults } from './scoring/calculator';
 import { printResults } from './output/console-reporter';
 import { writeJsonResults } from './output/json-reporter';
-import { loadTeamResults, generateLeaderboard, printLeaderboard } from './scoring/leaderboard';
+import { loadTeamResults, generateLeaderboard, printLeaderboard, writeLeaderboardJson, appendSubmission } from './scoring/leaderboard';
 import {
   CorrectnessResults,
   PerformanceResults,
@@ -34,6 +34,7 @@ export async function run(config: Config): Promise<void> {
     const allResults = loadTeamResults(config.resultsDir);
     const leaderboard = generateLeaderboard(allResults);
     printLeaderboard(leaderboard);
+    writeLeaderboardJson(leaderboard, allResults, config.resultsDir);
     return;
   }
 
@@ -159,12 +160,18 @@ export async function run(config: Config): Promise<void> {
     writeJsonResults(results, config.output);
   }
 
+  // Append to submission history if results directory provided
+  if (config.resultsDir) {
+    appendSubmission(results, config.resultsDir, config.commitSha);
+  }
+
   // Calculate relative performance scores if results directory provided
   if (config.resultsDir) {
     const allResults = loadTeamResults(config.resultsDir);
     allResults.push(results);
     const leaderboard = generateLeaderboard(allResults);
     printLeaderboard(leaderboard);
+    writeLeaderboardJson(leaderboard, allResults, config.resultsDir);
   }
 }
 

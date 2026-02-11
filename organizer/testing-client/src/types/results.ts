@@ -144,3 +144,39 @@ export interface LeaderboardEntry {
   code_quality: number;
   total: number;
 }
+
+/**
+ * Full leaderboard JSON file structure written for the leaderboard UI.
+ */
+export interface LeaderboardJson {
+  generated_at: string;
+  max_possible: number;
+  entries: LeaderboardEntry[];
+  team_details: Record<string, TestResults>;
+}
+
+/**
+ * A single submission record for the submissions history page.
+ */
+export interface SubmissionRecord {
+  team: string;
+  commit_sha: string;
+  timestamp: string;
+  total_score: number;
+  correctness: number;
+  performance: number;
+  bonus: number;
+  code_quality: number;
+  correctness_passed: number;
+  correctness_total: number;
+  error?: string;
+  details: TestResults;
+}
+
+/**
+ * Full submissions history JSON file.
+ */
+export interface SubmissionsJson {
+  updated_at: string;
+  submissions: SubmissionRecord[];
+}
