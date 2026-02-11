@@ -1,0 +1,50 @@
+{
+  "id": "C01",
+  "name": "create_dossier only",
+  "description": "Single dossier creation with one participant. Validates dossier fields, person fields, status=ACTIVE, empty policies.",
+  "request": {
+    "tenant_id": "test_tenant",
+    "calculation_instructions": {
+      "mutations": [
+        {
+          "mutation_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "mutation_definition_name": "create_dossier",
+          "mutation_type": "DOSSIER_CREATION",
+          "actual_at": "2020-01-01",
+          "mutation_properties": {
+            "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+            "person_id": "660e8400-e29b-41d4-a716-446655440001",
+            "name": "John Doe",
+            "birth_date": "1960-06-15"
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "http_status": 200,
+    "calculation_outcome": "SUCCESS",
+    "message_count": 0,
+    "messages": [],
+    "end_situation": {
+      "dossier": {
+        "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+        "status": "ACTIVE",
+        "retirement_date": null,
+        "persons": [
+          {
+            "person_id": "660e8400-e29b-41d4-a716-446655440001",
+            "role": "PARTICIPANT",
+            "name": "John Doe",
+            "birth_date": "1960-06-15"
+          }
+        ],
+        "policies": []
+      }
+    },
+    "end_situation_mutation_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    "end_situation_mutation_index": 0,
+    "end_situation_actual_at": "2020-01-01",
+    "mutations_processed_count": 1
+  }
+}

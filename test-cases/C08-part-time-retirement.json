@@ -1,0 +1,127 @@
+{
+  "id": "C08",
+  "name": "Multiple part-time factors + retirement",
+  "description": "Multiple policies with different part_time_factors. Validates weighted average calculation and proportional distribution.",
+  "request": {
+    "tenant_id": "test_tenant",
+    "calculation_instructions": {
+      "mutations": [
+        {
+          "mutation_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "mutation_definition_name": "create_dossier",
+          "mutation_type": "DOSSIER_CREATION",
+          "actual_at": "2020-01-01",
+          "mutation_properties": {
+            "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+            "person_id": "660e8400-e29b-41d4-a716-446655440001",
+            "name": "Bob Johnson",
+            "birth_date": "1958-03-20"
+          }
+        },
+        {
+          "mutation_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "mutation_definition_name": "add_policy",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2020-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "scheme_id": "SCHEME-A",
+            "employment_start_date": "1990-01-01",
+            "salary": 45000,
+            "part_time_factor": 1
+          }
+        },
+        {
+          "mutation_id": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+          "mutation_definition_name": "add_policy",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2020-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "scheme_id": "SCHEME-B",
+            "employment_start_date": "2005-06-15",
+            "salary": 55000,
+            "part_time_factor": 0.6
+          }
+        },
+        {
+          "mutation_id": "dddddddd-dddd-dddd-dddd-dddddddddddd",
+          "mutation_definition_name": "add_policy",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2020-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "scheme_id": "SCHEME-C",
+            "employment_start_date": "2010-09-01",
+            "salary": 70000,
+            "part_time_factor": 0.5
+          }
+        },
+        {
+          "mutation_id": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+          "mutation_definition_name": "calculate_retirement_benefit",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2025-06-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "retirement_date": "2025-06-01"
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "http_status": 200,
+    "calculation_outcome": "SUCCESS",
+    "message_count": 0,
+    "messages": [],
+    "end_situation": {
+      "dossier": {
+        "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+        "status": "RETIRED",
+        "retirement_date": "2025-06-01",
+        "persons": [
+          {
+            "person_id": "660e8400-e29b-41d4-a716-446655440001",
+            "role": "PARTICIPANT",
+            "name": "Bob Johnson",
+            "birth_date": "1958-03-20"
+          }
+        ],
+        "policies": [
+          {
+            "policy_id": "550e8400-e29b-41d4-a716-446655440000-1",
+            "scheme_id": "SCHEME-A",
+            "employment_start_date": "1990-01-01",
+            "salary": 45000,
+            "part_time_factor": 1,
+            "attainable_pension": 27963.575040085547,
+            "projections": null
+          },
+          {
+            "policy_id": "550e8400-e29b-41d4-a716-446655440000-2",
+            "scheme_id": "SCHEME-B",
+            "employment_start_date": "2005-06-15",
+            "salary": 55000,
+            "part_time_factor": 0.6,
+            "attainable_pension": 15762.073878412351,
+            "projections": null
+          },
+          {
+            "policy_id": "550e8400-e29b-41d4-a716-446655440000-3",
+            "scheme_id": "SCHEME-C",
+            "employment_start_date": "2010-09-01",
+            "salary": 70000,
+            "part_time_factor": 0.5,
+            "attainable_pension": 11645.904811823802,
+            "projections": null
+          }
+        ]
+      }
+    },
+    "end_situation_mutation_id": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+    "end_situation_mutation_index": 4,
+    "end_situation_actual_at": "2025-06-01",
+    "mutations_processed_count": 5
+  }
+}

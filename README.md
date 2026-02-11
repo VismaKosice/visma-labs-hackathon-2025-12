@@ -695,9 +695,10 @@ No documentation, presentations, or demos are required. Focus entirely on the co
 4. Review mutation definitions in `mutation-definitions/` for property schemas
 5. Set up your development environment
 6. Implement the core requirements
-7. Optimize for performance
-8. Attempt bonus features if time permits
-9. Submit your solution
+7. **Validate with test cases** — run `./test-cases/run-tests.sh` to check correctness (see `test-cases/README.md`)
+8. Optimize for performance
+9. Attempt bonus features if time permits
+10. Submit your solution
 
 ---
 

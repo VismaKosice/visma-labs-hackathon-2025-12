@@ -108,7 +108,37 @@ curl -X POST http://localhost:8080/calculation-requests \
 
 You should get a `200 OK` response with a `situation` object containing the created dossier.
 
-### 5. Push your code
+### 5. Run the test suite
+
+The `test-cases/` directory contains test cases with expected outputs that match the official scoring scenarios. Use the included test runner to validate your implementation:
+
+**macOS / Linux** (requires `curl` and `jq`):
+
+```bash
+./test-cases/run-tests.sh
+
+# Run against a different URL
+./test-cases/run-tests.sh http://localhost:3000
+
+# Run a single test case
+./test-cases/run-tests.sh http://localhost:8080 C07
+```
+
+**Windows** (PowerShell):
+
+```powershell
+.\test-cases\run-tests.ps1
+
+# Run against a different URL
+.\test-cases\run-tests.ps1 -BaseUrl http://localhost:3000
+
+# Run a single test case
+.\test-cases\run-tests.ps1 -Filter C07
+```
+
+The test runner checks HTTP status, calculation outcome, messages, end_situation (with 0.01 numeric tolerance), and metadata. See `test-cases/README.md` for full details on what each test covers.
+
+### 6. Push your code
 
 ```bash
 git add .

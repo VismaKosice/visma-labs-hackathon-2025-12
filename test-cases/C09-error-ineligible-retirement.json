@@ -1,0 +1,88 @@
+{
+  "id": "C09",
+  "name": "Error: retirement without eligibility",
+  "description": "Participant under 65 with less than 40 years of service. Validates CRITICAL NOT_ELIGIBLE, FAILURE outcome, processing halted.",
+  "request": {
+    "tenant_id": "test_tenant",
+    "calculation_instructions": {
+      "mutations": [
+        {
+          "mutation_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "mutation_definition_name": "create_dossier",
+          "mutation_type": "DOSSIER_CREATION",
+          "actual_at": "2020-01-01",
+          "mutation_properties": {
+            "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+            "person_id": "660e8400-e29b-41d4-a716-446655440001",
+            "name": "Young Worker",
+            "birth_date": "1990-01-01"
+          }
+        },
+        {
+          "mutation_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "mutation_definition_name": "add_policy",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2020-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "scheme_id": "SCHEME-A",
+            "employment_start_date": "2020-01-01",
+            "salary": 40000,
+            "part_time_factor": 1
+          }
+        },
+        {
+          "mutation_id": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+          "mutation_definition_name": "calculate_retirement_benefit",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2025-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "retirement_date": "2025-01-01"
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "http_status": 200,
+    "calculation_outcome": "FAILURE",
+    "message_count": 1,
+    "messages": [
+      {
+        "level": "CRITICAL",
+        "code": "NOT_ELIGIBLE"
+      }
+    ],
+    "end_situation": {
+      "dossier": {
+        "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+        "status": "ACTIVE",
+        "retirement_date": null,
+        "persons": [
+          {
+            "person_id": "660e8400-e29b-41d4-a716-446655440001",
+            "role": "PARTICIPANT",
+            "name": "Young Worker",
+            "birth_date": "1990-01-01"
+          }
+        ],
+        "policies": [
+          {
+            "policy_id": "550e8400-e29b-41d4-a716-446655440000-1",
+            "scheme_id": "SCHEME-A",
+            "employment_start_date": "2020-01-01",
+            "salary": 40000,
+            "part_time_factor": 1,
+            "attainable_pension": null,
+            "projections": null
+          }
+        ]
+      }
+    },
+    "end_situation_mutation_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+    "end_situation_mutation_index": 1,
+    "end_situation_actual_at": "2020-01-01",
+    "mutations_processed_count": 3
+  }
+}

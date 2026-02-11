@@ -1,0 +1,43 @@
+{
+  "id": "C10",
+  "name": "Error: mutation without dossier",
+  "description": "add_policy without prior create_dossier. Validates CRITICAL DOSSIER_NOT_FOUND, FAILURE outcome.",
+  "request": {
+    "tenant_id": "test_tenant",
+    "calculation_instructions": {
+      "mutations": [
+        {
+          "mutation_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "mutation_definition_name": "add_policy",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2020-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "scheme_id": "SCHEME-A",
+            "employment_start_date": "2000-01-01",
+            "salary": 50000,
+            "part_time_factor": 1
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "http_status": 200,
+    "calculation_outcome": "FAILURE",
+    "message_count": 1,
+    "messages": [
+      {
+        "level": "CRITICAL",
+        "code": "DOSSIER_NOT_FOUND"
+      }
+    ],
+    "end_situation": {
+      "dossier": null
+    },
+    "end_situation_mutation_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+    "end_situation_mutation_index": 0,
+    "end_situation_actual_at": "2020-01-01",
+    "mutations_processed_count": 1
+  }
+}

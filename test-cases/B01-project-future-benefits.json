@@ -1,0 +1,131 @@
+{
+  "id": "B01",
+  "name": "project_future_benefits (bonus)",
+  "description": "Yearly projections over 10 years. Validates projections array, counts, and calculated values. Status remains ACTIVE.",
+  "request": {
+    "tenant_id": "test_tenant",
+    "calculation_instructions": {
+      "mutations": [
+        {
+          "mutation_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "mutation_definition_name": "create_dossier",
+          "mutation_type": "DOSSIER_CREATION",
+          "actual_at": "2020-01-01",
+          "mutation_properties": {
+            "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+            "person_id": "660e8400-e29b-41d4-a716-446655440001",
+            "name": "Jane Smith",
+            "birth_date": "1960-06-15"
+          }
+        },
+        {
+          "mutation_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "mutation_definition_name": "add_policy",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2020-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "scheme_id": "SCHEME-A",
+            "employment_start_date": "2000-01-01",
+            "salary": 50000,
+            "part_time_factor": 1
+          }
+        },
+        {
+          "mutation_id": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+          "mutation_definition_name": "add_policy",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2020-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "scheme_id": "SCHEME-B",
+            "employment_start_date": "2010-01-01",
+            "salary": 60000,
+            "part_time_factor": 0.8
+          }
+        },
+        {
+          "mutation_id": "dddddddd-dddd-dddd-dddd-dddddddddddd",
+          "mutation_definition_name": "project_future_benefits",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2024-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "projection_start_date": "2025-01-01",
+            "projection_end_date": "2035-01-01",
+            "projection_interval_months": 12
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "http_status": 200,
+    "calculation_outcome": "SUCCESS",
+    "message_count": 0,
+    "messages": [],
+    "end_situation": {
+      "dossier": {
+        "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+        "status": "ACTIVE",
+        "retirement_date": null,
+        "persons": [
+          {
+            "person_id": "660e8400-e29b-41d4-a716-446655440001",
+            "role": "PARTICIPANT",
+            "name": "Jane Smith",
+            "birth_date": "1960-06-15"
+          }
+        ],
+        "policies": [
+          {
+            "policy_id": "550e8400-e29b-41d4-a716-446655440000-1",
+            "scheme_id": "SCHEME-A",
+            "employment_start_date": "2000-01-01",
+            "salary": 50000,
+            "part_time_factor": 1,
+            "attainable_pension": null,
+            "projections": [
+              { "date": "2025-01-01", "projected_pension": 24627.03114316982 },
+              { "date": "2026-01-01", "projected_pension": 25605.1705028657 },
+              { "date": "2027-01-01", "projected_pension": 26583.417958238108 },
+              { "date": "2028-01-01", "projected_pension": 27561.7594190822 },
+              { "date": "2029-01-01", "projected_pension": 28542.863858601166 },
+              { "date": "2030-01-01", "projected_pension": 29521.36016451091 },
+              { "date": "2031-01-01", "projected_pension": 30499.920497385596 },
+              { "date": "2032-01-01", "projected_pension": 31478.537747807128 },
+              { "date": "2033-01-01", "projected_pension": 32459.887168558012 },
+              { "date": "2034-01-01", "projected_pension": 33438.60092916982 },
+              { "date": "2035-01-01", "projected_pension": 34417.35569276042 }
+            ]
+          },
+          {
+            "policy_id": "550e8400-e29b-41d4-a716-446655440000-2",
+            "scheme_id": "SCHEME-B",
+            "employment_start_date": "2010-01-01",
+            "salary": 60000,
+            "part_time_factor": 0.8,
+            "attainable_pension": null,
+            "projections": [
+              { "date": "2025-01-01", "projected_pension": 14775.679329109444 },
+              { "date": "2026-01-01", "projected_pension": 15756.198422527867 },
+              { "date": "2027-01-01", "projected_pension": 16736.609420269768 },
+              { "date": "2028-01-01", "projected_pension": 17716.92641253998 },
+              { "date": "2029-01-01", "projected_pension": 18699.846613678095 },
+              { "date": "2030-01-01", "projected_pension": 19680.00876088266 },
+              { "date": "2031-01-01", "projected_pension": 20660.106881122276 },
+              { "date": "2032-01-01", "projected_pension": 21640.148083815046 },
+              { "date": "2033-01-01", "projected_pension": 22622.823303721245 },
+              { "date": "2034-01-01", "projected_pension": 23602.76799622374 },
+              { "date": "2035-01-01", "projected_pension": 24582.671685747453 }
+            ]
+          }
+        ]
+      }
+    },
+    "end_situation_mutation_id": "dddddddd-dddd-dddd-dddd-dddddddddddd",
+    "end_situation_mutation_index": 3,
+    "end_situation_actual_at": "2024-01-01",
+    "mutations_processed_count": 4
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "id": "C13",
+  "name": "Warning: negative salary clamped to zero",
+  "description": "apply_indexation with -200% that would make salary negative. Validates WARNING NEGATIVE_SALARY_CLAMPED, salary clamped to 0.",
+  "request": {
+    "tenant_id": "test_tenant",
+    "calculation_instructions": {
+      "mutations": [
+        {
+          "mutation_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "mutation_definition_name": "create_dossier",
+          "mutation_type": "DOSSIER_CREATION",
+          "actual_at": "2020-01-01",
+          "mutation_properties": {
+            "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+            "person_id": "660e8400-e29b-41d4-a716-446655440001",
+            "name": "John Doe",
+            "birth_date": "1960-06-15"
+          }
+        },
+        {
+          "mutation_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "mutation_definition_name": "add_policy",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2020-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "scheme_id": "SCHEME-A",
+            "employment_start_date": "2000-01-01",
+            "salary": 1000,
+            "part_time_factor": 1.0
+          }
+        },
+        {
+          "mutation_id": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+          "mutation_definition_name": "apply_indexation",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2021-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "percentage": -2.0
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "http_status": 200,
+    "calculation_outcome": "SUCCESS",
+    "message_count": 1,
+    "messages": [
+      {
+        "level": "WARNING",
+        "code": "NEGATIVE_SALARY_CLAMPED"
+      }
+    ],
+    "end_situation": {
+      "dossier": {
+        "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+        "status": "ACTIVE",
+        "retirement_date": null,
+        "persons": [
+          {
+            "person_id": "660e8400-e29b-41d4-a716-446655440001",
+            "role": "PARTICIPANT",
+            "name": "John Doe",
+            "birth_date": "1960-06-15"
+          }
+        ],
+        "policies": [
+          {
+            "policy_id": "550e8400-e29b-41d4-a716-446655440000-1",
+            "scheme_id": "SCHEME-A",
+            "employment_start_date": "2000-01-01",
+            "salary": 0,
+            "part_time_factor": 1.0,
+            "attainable_pension": null,
+            "projections": null
+          }
+        ]
+      }
+    },
+    "end_situation_mutation_id": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+    "end_situation_mutation_index": 2,
+    "end_situation_actual_at": "2021-01-01",
+    "mutations_processed_count": 3
+  }
+}

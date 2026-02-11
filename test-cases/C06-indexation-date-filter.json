@@ -1,0 +1,106 @@
+{
+  "id": "C06",
+  "name": "apply_indexation with effective_before filter",
+  "description": "Apply 4% indexation only to policies with employment_start_date before 2010-01-01.",
+  "request": {
+    "tenant_id": "test_tenant",
+    "calculation_instructions": {
+      "mutations": [
+        {
+          "mutation_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "mutation_definition_name": "create_dossier",
+          "mutation_type": "DOSSIER_CREATION",
+          "actual_at": "2020-01-01",
+          "mutation_properties": {
+            "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+            "person_id": "660e8400-e29b-41d4-a716-446655440001",
+            "name": "John Doe",
+            "birth_date": "1960-06-15"
+          }
+        },
+        {
+          "mutation_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "mutation_definition_name": "add_policy",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2020-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "scheme_id": "SCHEME-A",
+            "employment_start_date": "2000-01-01",
+            "salary": 50000,
+            "part_time_factor": 1
+          }
+        },
+        {
+          "mutation_id": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+          "mutation_definition_name": "add_policy",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2020-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "scheme_id": "SCHEME-B",
+            "employment_start_date": "2015-01-01",
+            "salary": 60000,
+            "part_time_factor": 0.8
+          }
+        },
+        {
+          "mutation_id": "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
+          "mutation_definition_name": "apply_indexation",
+          "mutation_type": "DOSSIER",
+          "actual_at": "2021-01-01",
+          "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+          "mutation_properties": {
+            "percentage": 0.04,
+            "effective_before": "2010-01-01"
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "http_status": 200,
+    "calculation_outcome": "SUCCESS",
+    "message_count": 0,
+    "messages": [],
+    "end_situation": {
+      "dossier": {
+        "dossier_id": "550e8400-e29b-41d4-a716-446655440000",
+        "status": "ACTIVE",
+        "retirement_date": null,
+        "persons": [
+          {
+            "person_id": "660e8400-e29b-41d4-a716-446655440001",
+            "role": "PARTICIPANT",
+            "name": "John Doe",
+            "birth_date": "1960-06-15"
+          }
+        ],
+        "policies": [
+          {
+            "policy_id": "550e8400-e29b-41d4-a716-446655440000-1",
+            "scheme_id": "SCHEME-A",
+            "employment_start_date": "2000-01-01",
+            "salary": 52000,
+            "part_time_factor": 1,
+            "attainable_pension": null,
+            "projections": null
+          },
+          {
+            "policy_id": "550e8400-e29b-41d4-a716-446655440000-2",
+            "scheme_id": "SCHEME-B",
+            "employment_start_date": "2015-01-01",
+            "salary": 60000,
+            "part_time_factor": 0.8,
+            "attainable_pension": null,
+            "projections": null
+          }
+        ]
+      }
+    },
+    "end_situation_mutation_id": "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
+    "end_situation_mutation_index": 3,
+    "end_situation_actual_at": "2021-01-01",
+    "mutations_processed_count": 4
+  }
+}
