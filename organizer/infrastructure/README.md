@@ -156,6 +156,36 @@ This creates one repo per team and updates `organizer/infrastructure/teams.json`
 
 Give each team push access to their repo and share the URL.
 
+### Syncing Team Repositories with Template Updates
+
+If you make changes to the template repository (e.g., adding test cases, fixing documentation), you can sync all team repositories with the latest changes:
+
+```bash
+# Dry run (see what would happen)
+./organizer/infrastructure/sync-team-repos.sh \
+  --template "VismaKosice/visma-labs-hackathon-2025-12"
+
+# Actually sync and push changes
+./organizer/infrastructure/sync-team-repos.sh \
+  --template "VismaKosice/visma-labs-hackathon-2025-12" \
+  --push
+
+# Sync only specific teams
+./organizer/infrastructure/sync-team-repos.sh \
+  --template "VismaKosice/visma-labs-hackathon-2025-12" \
+  --teams "alpha,beta" \
+  --push
+```
+
+The sync script:
+- Reads team repo URLs from `teams.json`
+- For each repo, adds the template as a remote (if not already added)
+- Fetches latest changes from template's main branch
+- Merges template/main into each team repo's main branch
+- Optionally pushes the changes (use `--push`)
+
+**Note:** If a team has made local changes that conflict with template updates, the merge will fail and you'll need to resolve conflicts manually. The script will leave the cloned repository in a temp directory for manual resolution.
+
 ## Step 4: Clone Repository and Install Testing Client
 
 On the VM:
