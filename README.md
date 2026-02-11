@@ -575,7 +575,7 @@ Measured **only on test scenarios that pass correctness**. If you fail a correct
 | Error handling quality | 1.5 |
 | Project structure and build setup | 1.5 |
 
-**How it works:** An AI model reviews your source code and scores each aspect using a standardized prompt. The review is run 3 times per submission, and the median score is taken for each aspect. The AI does **not** assess correctness or performance (those are scored by automated tools). See `organizer/testing-client/ai-code-review-prompt.md` for the full scoring rubric.
+**How it works:** An AI model reviews your source code and scores each aspect using a standardized prompt. The review is run 3 times per submission, and the median score is taken for each aspect. The AI does **not** assess correctness or performance (those are scored by automated tools).
 
 **Note:** Scoring breakdown may be adjusted before the event. Final scoring criteria will be confirmed at kickoff.
 
