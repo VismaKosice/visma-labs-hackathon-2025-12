@@ -62,6 +62,7 @@ interface AIReviewResponse {
   };
   overall_total: number;
   language: string;
+  framework: string;
   summary: string;
 }
 
@@ -203,6 +204,12 @@ export async function runAICodeReview(
   console.log(`  Code Quality: ${finalResult.code_quality.total}/5`);
   console.log(`  Clean Architecture: ${finalResult.clean_architecture.total}/4`);
 
+  // Format technology stack: "Language" or "Language (Framework)"
+  let techStack = finalResult.language;
+  if (finalResult.framework && finalResult.framework !== 'None' && finalResult.framework !== finalResult.language) {
+    techStack = `${finalResult.language} (${finalResult.framework})`;
+  }
+
   return {
     codeQuality: {
       readability_and_organization: finalResult.code_quality.readability_and_organization.score,
@@ -230,7 +237,7 @@ export async function runAICodeReview(
         extensibility: finalResult.clean_architecture.extensibility.rationale,
       },
     },
-    technologyStack: finalResult.language,
+    technologyStack: techStack,
   };
 }
 
@@ -457,6 +464,7 @@ function aggregateResults(results: AIReviewResponse[]): AIReviewResponse {
       },
       overall_total: (results[0].overall_total + results[1].overall_total) / 2,
       language: results[0].language,
+      framework: results[0].framework || results[1].framework || 'None',
       summary: results[0].summary && results[1].summary 
         ? `${results[0].summary}\n\n[Additional assessment from second run:] ${results[1].summary}`
         : (results[0].summary || results[1].summary || ''),

@@ -149,7 +149,8 @@ You MUST respond with ONLY a JSON object. No explanatory text before or after. T
     "total": <number, sum of above four scores, max 4>
   },
   "overall_total": <number, code_quality.total + clean_architecture.total, max 9>,
-  "language": "<programming language used>",
+  "language": "<programming language used, e.g., TypeScript, Python, Go, Rust, Java>",
+  "framework": "<primary framework/library used, e.g., Express.js, FastAPI, Spring Boot, Actix, Gin. If no framework is used or it's unclear, use 'None' or the language name>",
   "summary": "<2-3 sentence overall assessment>"
 }
 

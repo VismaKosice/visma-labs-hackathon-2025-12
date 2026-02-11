@@ -93,6 +93,7 @@ export async function run(config: Config): Promise<void> {
     points: 0,
     skipped: true,
   };
+  let technologyStack: string | undefined;
 
   const suite = config.suite;
 
@@ -134,7 +135,6 @@ export async function run(config: Config): Promise<void> {
     }
 
     // AI Code Review (scores both code quality and clean architecture)
-    let technologyStack: string | undefined;
     if (config.codePath) {
       const aiResult = await runAICodeReview(config);
       codeQuality = aiResult.codeQuality;

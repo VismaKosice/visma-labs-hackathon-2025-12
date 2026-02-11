@@ -224,6 +224,24 @@
     font-weight: 600;
     font-size: 15px;
     letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tech-stack-badge {
+    display: inline-block;
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(79, 140, 255, 0.3);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    white-space: nowrap;
   }
 
   .team-timestamp {
@@ -633,10 +651,18 @@
       // Rank
       html += `<div><div class="rank-badge">${entry.rank}</div></div>`;
 
-      // Team name
-      const techStack = detail?.technology_stack ? `<span style="color:var(--text-secondary);font-size:12px;font-weight:400;margin-left:8px">(${esc(detail.technology_stack)})</span>` : '';
+      // Team name with technology stack badge
+      const techStack = detail?.technology_stack;
+      let techStackHtml = '';
+      if (techStack) {
+        techStackHtml = `<span class="tech-stack-badge" title="Technology Stack: ${esc(techStack)}">${esc(techStack)}</span>`;
+      }
       html += `<div>
-        <div class="team-name">${esc(entry.team)}${techStack} <span class="expand-icon">&#9660;</span></div>
+        <div class="team-name">
+          ${esc(entry.team)}
+          ${techStackHtml}
+          <span class="expand-icon">&#9660;</span>
+        </div>
         <div class="team-timestamp">
           ${detail?.timestamp ? `Tested ${formatRelative(new Date(detail.timestamp))}` : ''}
           ${hasError ? `<span style="color:var(--red)">${esc(detail.error)}</span>` : ''}
