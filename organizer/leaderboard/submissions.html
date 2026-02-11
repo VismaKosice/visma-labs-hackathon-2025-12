@@ -421,6 +421,37 @@
     50% { opacity: 1; }
   }
 
+  /* Tooltip styles */
+  .tooltip-trigger {
+    position: relative;
+  }
+
+  .tooltip-trigger:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: normal;
+    width: 250px;
+    z-index: 1000;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    margin-bottom: 4px;
+    line-height: 1.4;
+    pointer-events: none;
+  }
+
+  .reasoning-text {
+    border-left: 2px solid var(--border);
+    padding-left: 8px !important;
+  }
+
   /* Timeline connector */
   .submission-card::before {
     content: '';
@@ -591,6 +622,15 @@
     // Render list
     const list = document.getElementById('submissions-list');
 
+    // Preserve expanded state before rebuild - use data attribute for reliable matching
+    const expandedIds = new Set();
+    list.querySelectorAll('.submission-card.expanded').forEach(card => {
+      const subId = card.getAttribute('data-submission-id');
+      if (subId) {
+        expandedIds.add(subId);
+      }
+    });
+
     if (subs.length === 0) {
       list.innerHTML = `
         <div class="empty-state">
@@ -607,8 +647,12 @@
       const sub = subs[i];
       const hasError = !!sub.error;
       const prevScore = prevScoreMap[sub.team + ':' + sub.timestamp];
+      // Use timestamp + commit_sha as unique ID (commit_sha can be 'unknown', that's fine)
+      const subId = `${sub.timestamp}:${sub.commit_sha || 'unknown'}`;
+      const isExpanded = expandedIds.has(subId);
+      const expandedClass = isExpanded ? ' expanded' : '';
 
-      html += `<div class="submission-card" onclick="toggleCard(this)">`;
+      html += `<div class="submission-card${expandedClass}" data-submission-id="${esc(subId)}" onclick="toggleCard(this)">`;
       html += `<div class="submission-main">`;
 
       // Team + meta
@@ -657,6 +701,14 @@
     }
 
     list.innerHTML = html;
+    
+    // Restore expanded state after DOM update - match by data attribute
+    expandedIds.forEach(subId => {
+      const card = list.querySelector(`[data-submission-id="${subId}"]`);
+      if (card) {
+        card.classList.add('expanded');
+      }
+    });
   }
 
   function miniScore(value, max, label, color) {
@@ -757,7 +809,55 @@
       html += detailRow('Cold Start', cs.time_ms != null ? fmtMs(cs.time_ms) + ` (${cs.points} pts)` : 'N/A');
     }
     if (detail.bonus.clean_architecture) {
-      html += detailRow('Clean Architecture', detail.bonus.clean_architecture.points + ' pts');
+      const ca = detail.bonus.clean_architecture;
+      const caReasoning = ca.reasoning || {};
+      html += detailRowWithTooltip(
+        'Clean Architecture', 
+        ca.points + ' pts',
+        'Clean Mutation Architecture: Evaluates whether mutations use a proper extensible architecture (common interface, per-mutation implementations, generic dispatch, extensibility) rather than hardcoded conditional logic.',
+        ''
+      );
+      
+      // Show individual clean architecture criteria with reasoning
+      if (caReasoning.common_interface !== undefined || caReasoning.per_mutation_implementation !== undefined || 
+          caReasoning.generic_dispatch !== undefined || caReasoning.extensibility !== undefined) {
+        html += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px">`;
+        html += `<div style="color:var(--text-secondary);margin-bottom:6px;font-weight:600">Architecture Details:</div>`;
+        
+        if (caReasoning.common_interface !== undefined) {
+          html += detailRowWithTooltip(
+            'Common Interface', 
+            (ca.common_interface === 1 ? '✓' : '✗') + ' (' + ca.common_interface + '/1)',
+            'Common Mutation Interface: Checks if a common interface/abstract class/trait exists that defines what a mutation must implement (validation and application logic).',
+            caReasoning.common_interface
+          );
+        }
+        if (caReasoning.per_mutation_implementation !== undefined) {
+          html += detailRowWithTooltip(
+            'Per-Mutation Implementation', 
+            (ca.per_mutation_implementation === 1 ? '✓' : '✗') + ' (' + ca.per_mutation_implementation + '/1)',
+            'Per-Mutation Implementation: Verifies each mutation type has its own implementation of the common interface, in separate files/modules.',
+            caReasoning.per_mutation_implementation
+          );
+        }
+        if (caReasoning.generic_dispatch !== undefined) {
+          html += detailRowWithTooltip(
+            'Generic Dispatch', 
+            (ca.generic_dispatch === 1 ? '✓' : '✗') + ' (' + ca.generic_dispatch + '/1)',
+            'Generic Dispatch: Checks if mutations are resolved by name using a registry/map/dictionary (no if/else chains or switch statements on mutation names in the main loop).',
+            caReasoning.generic_dispatch
+          );
+        }
+        if (caReasoning.extensibility !== undefined) {
+          html += detailRowWithTooltip(
+            'Extensibility', 
+            (ca.extensibility === 1 ? '✓' : '✗') + ' (' + ca.extensibility + '/1)',
+            'Extensibility: Verifies that a new mutation can be added by only implementing the interface and registering it, without modifying core engine code.',
+            caReasoning.extensibility
+          );
+        }
+        html += `</div>`;
+      }
     }
     html += `</div>`;
 
@@ -766,9 +866,37 @@
     if (detail.code_quality.skipped) {
       html += `<div class="detail-row"><span class="label" style="color:var(--text-muted)">AI review was skipped</span></div>`;
     } else {
-      html += detailRow('Readability', detail.code_quality.readability_and_organization.toFixed(1) + '/2');
-      html += detailRow('Error Handling', detail.code_quality.error_handling.toFixed(1) + '/1.5');
-      html += detailRow('Project Structure', detail.code_quality.project_structure.toFixed(1) + '/1.5');
+      // Show AI summary if available
+      if (detail.code_quality.summary) {
+        html += `<div class="ai-summary-box" style="background:linear-gradient(135deg, var(--bg-expanded) 0%, rgba(79, 140, 255, 0.05) 100%);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;padding:14px;margin-bottom:14px;font-size:12px;line-height:1.6">`;
+        html += `<div style="color:var(--accent);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">`;
+        html += `<span style="font-size:14px">💡</span><span>AI Assessment & Improvement Suggestions</span>`;
+        html += `</div>`;
+        html += `<div style="color:var(--text-primary);white-space:pre-wrap;word-wrap:break-word">${esc(detail.code_quality.summary)}</div>`;
+        html += `</div>`;
+      }
+      const readabilityReasoning = detail.code_quality.reasoning?.readability_and_organization || '';
+      const errorHandlingReasoning = detail.code_quality.reasoning?.error_handling || '';
+      const projectStructureReasoning = detail.code_quality.reasoning?.project_structure || '';
+      
+      html += detailRowWithTooltip(
+        'Readability', 
+        detail.code_quality.readability_and_organization.toFixed(1) + '/2',
+        'Code Readability and Organization: Assesses variable/function naming, code organization, comments, formatting consistency, and overall understandability.',
+        readabilityReasoning
+      );
+      html += detailRowWithTooltip(
+        'Error Handling', 
+        detail.code_quality.error_handling.toFixed(1) + '/1.5',
+        'Error Handling Quality: Evaluates how gracefully the code handles expected errors (validation failures, missing data), error propagation (CRITICAL vs WARNING), unexpected errors, and defensive coding.',
+        errorHandlingReasoning
+      );
+      html += detailRowWithTooltip(
+        'Project Structure', 
+        detail.code_quality.project_structure.toFixed(1) + '/1.5',
+        'Project Structure and Build Setup: Assesses logical directory organization, working Dockerfile, dependency management, clear entry point, and buildability.',
+        projectStructureReasoning
+      );
     }
     html += `</div>`;
 
@@ -778,6 +906,26 @@
 
   function detailRow(label, value) {
     return `<div class="detail-row"><span class="label">${label}</span><span class="value">${value}</span></div>`;
+  }
+
+  function detailRowWithTooltip(label, value, tooltipText, reasoning) {
+    const hasReasoning = reasoning && reasoning.trim().length > 0;
+    const tooltipId = 'tooltip-' + Math.random().toString(36).substr(2, 9);
+    let html = `<div class="detail-row">`;
+    html += `<span class="label" style="display:flex;align-items:center;gap:4px">`;
+    html += `${label}`;
+    html += `<span class="tooltip-trigger" data-tooltip-id="${tooltipId}" style="cursor:help;color:var(--accent);font-size:14px" title="${esc(tooltipText)}">ℹ</span>`;
+    html += `</span>`;
+    html += `<span class="value">${value}</span>`;
+    html += `</div>`;
+    
+    if (hasReasoning) {
+      html += `<div class="reasoning-text" style="font-size:11px;color:var(--text-muted);padding-left:12px;margin-top:2px;margin-bottom:6px;line-height:1.4">`;
+      html += `<strong style="color:var(--text-secondary)">Reasoning:</strong> ${esc(reasoning)}`;
+      html += `</div>`;
+    }
+    
+    return html;
   }
 
   function bonusRow(label, result) {

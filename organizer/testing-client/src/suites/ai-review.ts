@@ -74,8 +74,20 @@ export async function runAICodeReview(
   if (!config.codePath) {
     console.log('  AI code review skipped (no --code-path provided)');
     return {
-      codeQuality: { readability_and_organization: 0, error_handling: 0, project_structure: 0, points: 0, skipped: true },
-      cleanArchitecture: { common_interface: 0, per_mutation_implementation: 0, generic_dispatch: 0, extensibility: 0, points: 0 },
+      codeQuality: { 
+        readability_and_organization: 0, 
+        error_handling: 0, 
+        project_structure: 0, 
+        points: 0, 
+        skipped: true 
+      },
+      cleanArchitecture: { 
+        common_interface: 0, 
+        per_mutation_implementation: 0, 
+        generic_dispatch: 0, 
+        extensibility: 0, 
+        points: 0 
+      },
     };
   }
 
@@ -86,8 +98,20 @@ export async function runAICodeReview(
   if (sourceFiles.length === 0) {
     console.log('  No source files found');
     return {
-      codeQuality: { readability_and_organization: 0, error_handling: 0, project_structure: 0, points: 0, skipped: true },
-      cleanArchitecture: { common_interface: 0, per_mutation_implementation: 0, generic_dispatch: 0, extensibility: 0, points: 0 },
+      codeQuality: { 
+        readability_and_organization: 0, 
+        error_handling: 0, 
+        project_structure: 0, 
+        points: 0, 
+        skipped: true 
+      },
+      cleanArchitecture: { 
+        common_interface: 0, 
+        per_mutation_implementation: 0, 
+        generic_dispatch: 0, 
+        extensibility: 0, 
+        points: 0 
+      },
     };
   }
 
@@ -107,8 +131,20 @@ export async function runAICodeReview(
   } catch {
     console.log('  Could not load ai-code-review-prompt.md');
     return {
-      codeQuality: { readability_and_organization: 0, error_handling: 0, project_structure: 0, points: 0, skipped: true },
-      cleanArchitecture: { common_interface: 0, per_mutation_implementation: 0, generic_dispatch: 0, extensibility: 0, points: 0 },
+      codeQuality: { 
+        readability_and_organization: 0, 
+        error_handling: 0, 
+        project_structure: 0, 
+        points: 0, 
+        skipped: true 
+      },
+      cleanArchitecture: { 
+        common_interface: 0, 
+        per_mutation_implementation: 0, 
+        generic_dispatch: 0, 
+        extensibility: 0, 
+        points: 0 
+      },
     };
   }
 
@@ -135,8 +171,20 @@ export async function runAICodeReview(
   if (results.length === 0) {
     console.log('  AI review failed - no successful responses');
     return {
-      codeQuality: { readability_and_organization: 0, error_handling: 0, project_structure: 0, points: 0, skipped: true },
-      cleanArchitecture: { common_interface: 0, per_mutation_implementation: 0, generic_dispatch: 0, extensibility: 0, points: 0 },
+      codeQuality: { 
+        readability_and_organization: 0, 
+        error_handling: 0, 
+        project_structure: 0, 
+        points: 0, 
+        skipped: true 
+      },
+      cleanArchitecture: { 
+        common_interface: 0, 
+        per_mutation_implementation: 0, 
+        generic_dispatch: 0, 
+        extensibility: 0, 
+        points: 0 
+      },
     };
   }
 
@@ -160,6 +208,12 @@ export async function runAICodeReview(
       project_structure: finalResult.code_quality.project_structure.score,
       points: finalResult.code_quality.total,
       skipped: false,
+      reasoning: {
+        readability_and_organization: finalResult.code_quality.readability_and_organization.rationale,
+        error_handling: finalResult.code_quality.error_handling.rationale,
+        project_structure: finalResult.code_quality.project_structure.rationale,
+      },
+      summary: finalResult.summary,
     },
     cleanArchitecture: {
       common_interface: finalResult.clean_architecture.common_interface.score,
@@ -167,6 +221,12 @@ export async function runAICodeReview(
       generic_dispatch: finalResult.clean_architecture.generic_dispatch.score,
       extensibility: finalResult.clean_architecture.extensibility.score,
       points: finalResult.clean_architecture.total,
+      reasoning: {
+        common_interface: finalResult.clean_architecture.common_interface.rationale,
+        per_mutation_implementation: finalResult.clean_architecture.per_mutation_implementation.rationale,
+        generic_dispatch: finalResult.clean_architecture.generic_dispatch.rationale,
+        extensibility: finalResult.clean_architecture.extensibility.rationale,
+      },
     },
   };
 }
@@ -238,117 +298,165 @@ async function callAIModel(prompt: string): Promise<AIReviewResponse | null> {
 }
 
 async function callOpenAI(prompt: string, apiKey: string): Promise<AIReviewResponse | null> {
-  try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4o',
-        temperature: 0,
-        messages: [
-          { role: 'user', content: prompt },
-        ],
-        response_format: { type: 'json_object' },
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 120000,
-      }
-    );
+  const maxRetries = 3;
+  let lastError: Error | null = null;
 
-    const content = response.data.choices?.[0]?.message?.content;
-    if (content) {
-      return JSON.parse(content) as AIReviewResponse;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: 'gpt-4o-mini',
+          temperature: 0,
+          messages: [
+            { role: 'user', content: prompt },
+          ],
+          response_format: { type: 'json_object' },
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 120000,
+        }
+      );
+
+      const content = response.data.choices?.[0]?.message?.content;
+      if (content) {
+        return JSON.parse(content) as AIReviewResponse;
+      }
+      return null;
+    } catch (err: any) {
+      lastError = err;
+      const statusCode = err?.response?.status;
+      const isRateLimit = statusCode === 429;
+      
+      if (isRateLimit && attempt < maxRetries - 1) {
+        // Exponential backoff: 2^attempt seconds (2s, 4s, 8s)
+        const waitSeconds = Math.pow(2, attempt);
+        console.log(`  Rate limited (429), retrying in ${waitSeconds}s... (attempt ${attempt + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, waitSeconds * 1000));
+        continue;
+      }
+      
+      // For non-rate-limit errors or final attempt, log and return
+      const errorMsg = err?.response?.status 
+        ? `Request failed with status code ${err.response.status}`
+        : (err as Error).message;
+      console.log(`  OpenAI API error: ${errorMsg}`);
+      return null;
     }
-    return null;
-  } catch (err) {
-    console.log(`  OpenAI API error: ${(err as Error).message}`);
-    return null;
   }
+
+  return null;
 }
 
 async function callAnthropic(prompt: string, apiKey: string): Promise<AIReviewResponse | null> {
-  try {
-    const response = await axios.post(
-      'https://api.anthropic.com/v1/messages',
-      {
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        temperature: 0,
-        messages: [
-          { role: 'user', content: prompt },
-        ],
-      },
-      {
-        headers: {
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'Content-Type': 'application/json',
-        },
-        timeout: 120000,
-      }
-    );
+  const maxRetries = 3;
+  let lastError: Error | null = null;
 
-    const content = response.data.content?.[0]?.text;
-    if (content) {
-      // Extract JSON from the response (may be wrapped in markdown)
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]) as AIReviewResponse;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await axios.post(
+        'https://api.anthropic.com/v1/messages',
+        {
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4096,
+          temperature: 0,
+          messages: [
+            { role: 'user', content: prompt },
+          ],
+        },
+        {
+          headers: {
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'Content-Type': 'application/json',
+          },
+          timeout: 120000,
+        }
+      );
+
+      const content = response.data.content?.[0]?.text;
+      if (content) {
+        // Extract JSON from the response (may be wrapped in markdown)
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          return JSON.parse(jsonMatch[0]) as AIReviewResponse;
+        }
       }
+      return null;
+    } catch (err: any) {
+      lastError = err;
+      const statusCode = err?.response?.status;
+      const isRateLimit = statusCode === 429;
+      
+      if (isRateLimit && attempt < maxRetries - 1) {
+        // Exponential backoff: 2^attempt seconds (2s, 4s, 8s)
+        const waitSeconds = Math.pow(2, attempt);
+        console.log(`  Rate limited (429), retrying in ${waitSeconds}s... (attempt ${attempt + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, waitSeconds * 1000));
+        continue;
+      }
+      
+      // For non-rate-limit errors or final attempt, log and return
+      const errorMsg = err?.response?.status 
+        ? `Request failed with status code ${err.response.status}`
+        : (err as Error).message;
+      console.log(`  Anthropic API error: ${errorMsg}`);
+      return null;
     }
-    return null;
-  } catch (err) {
-    console.log(`  Anthropic API error: ${(err as Error).message}`);
-    return null;
   }
+
+  return null;
 }
 
 function aggregateResults(results: AIReviewResponse[]): AIReviewResponse {
   if (results.length === 1) return results[0];
 
   if (results.length === 2) {
-    // Average
+    // Average - combine rationales from both runs
     return {
       code_quality: {
         readability_and_organization: {
           score: (results[0].code_quality.readability_and_organization.score + results[1].code_quality.readability_and_organization.score) / 2,
-          rationale: results[0].code_quality.readability_and_organization.rationale,
+          rationale: `${results[0].code_quality.readability_and_organization.rationale} [Run 2: ${results[1].code_quality.readability_and_organization.rationale}]`,
         },
         error_handling: {
           score: (results[0].code_quality.error_handling.score + results[1].code_quality.error_handling.score) / 2,
-          rationale: results[0].code_quality.error_handling.rationale,
+          rationale: `${results[0].code_quality.error_handling.rationale} [Run 2: ${results[1].code_quality.error_handling.rationale}]`,
         },
         project_structure: {
           score: (results[0].code_quality.project_structure.score + results[1].code_quality.project_structure.score) / 2,
-          rationale: results[0].code_quality.project_structure.rationale,
+          rationale: `${results[0].code_quality.project_structure.rationale} [Run 2: ${results[1].code_quality.project_structure.rationale}]`,
         },
         total: (results[0].code_quality.total + results[1].code_quality.total) / 2,
       },
       clean_architecture: {
         common_interface: {
           score: Math.round((results[0].clean_architecture.common_interface.score + results[1].clean_architecture.common_interface.score) / 2),
-          rationale: results[0].clean_architecture.common_interface.rationale,
+          rationale: `${results[0].clean_architecture.common_interface.rationale} [Run 2: ${results[1].clean_architecture.common_interface.rationale}]`,
         },
         per_mutation_implementation: {
           score: Math.round((results[0].clean_architecture.per_mutation_implementation.score + results[1].clean_architecture.per_mutation_implementation.score) / 2),
-          rationale: results[0].clean_architecture.per_mutation_implementation.rationale,
+          rationale: `${results[0].clean_architecture.per_mutation_implementation.rationale} [Run 2: ${results[1].clean_architecture.per_mutation_implementation.rationale}]`,
         },
         generic_dispatch: {
           score: Math.round((results[0].clean_architecture.generic_dispatch.score + results[1].clean_architecture.generic_dispatch.score) / 2),
-          rationale: results[0].clean_architecture.generic_dispatch.rationale,
+          rationale: `${results[0].clean_architecture.generic_dispatch.rationale} [Run 2: ${results[1].clean_architecture.generic_dispatch.rationale}]`,
         },
         extensibility: {
           score: Math.round((results[0].clean_architecture.extensibility.score + results[1].clean_architecture.extensibility.score) / 2),
-          rationale: results[0].clean_architecture.extensibility.rationale,
+          rationale: `${results[0].clean_architecture.extensibility.rationale} [Run 2: ${results[1].clean_architecture.extensibility.rationale}]`,
         },
         total: (results[0].clean_architecture.total + results[1].clean_architecture.total) / 2,
       },
       overall_total: (results[0].overall_total + results[1].overall_total) / 2,
       language: results[0].language,
-      summary: results[0].summary,
+      summary: results[0].summary && results[1].summary 
+        ? `${results[0].summary}\n\n[Additional assessment from second run:] ${results[1].summary}`
+        : (results[0].summary || results[1].summary || ''),
     };
   }
 

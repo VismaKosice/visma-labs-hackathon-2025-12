@@ -151,6 +151,26 @@ fi
 echo "Container engine: $CONTAINER_ENGINE"
 
 # -------------------------------------------------------------------
+# Load API key from secure file (if present)
+# -------------------------------------------------------------------
+ENV_FILE="$HOME/.hackathon-env"
+if [[ -f "$ENV_FILE" ]]; then
+    # Source the file to load API keys (file has permissions 600, safe)
+    set +u  # Temporarily allow unset vars (in case file is empty)
+    source "$ENV_FILE"
+    set -u
+    # Export the variables so child processes (testing client) can access them
+    if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
+        export ANTHROPIC_API_KEY
+        echo "API key loaded from $ENV_FILE (ANTHROPIC_API_KEY)"
+    fi
+    if [[ -n "${OPENAI_API_KEY:-}" ]]; then
+        export OPENAI_API_KEY
+        echo "API key loaded from $ENV_FILE (OPENAI_API_KEY)"
+    fi
+fi
+
+# -------------------------------------------------------------------
 # Read teams
 # -------------------------------------------------------------------
 TEAM_COUNT=$(jq 'length' "$TEAMS_FILE")

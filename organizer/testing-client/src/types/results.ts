@@ -112,6 +112,12 @@ export interface CleanArchitectureResult {
   generic_dispatch: number;
   extensibility: number;
   points: number;
+  reasoning?: {
+    common_interface?: string;
+    per_mutation_implementation?: string;
+    generic_dispatch?: string;
+    extensibility?: string;
+  };
 }
 
 export interface ColdStartResult {
@@ -126,6 +132,13 @@ export interface CodeQualityResults {
   points: number;
   /** Whether AI review was skipped (e.g., no API key or no --code-path). */
   skipped?: boolean;
+  reasoning?: {
+    readability_and_organization?: string;
+    error_handling?: string;
+    project_structure?: string;
+  };
+  /** AI-generated overall summary with assessment and improvement suggestions. */
+  summary?: string;
 }
 
 export interface TotalScore {
