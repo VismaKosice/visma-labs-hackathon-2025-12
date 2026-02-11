@@ -1,0 +1,586 @@
+{
+  "generated_at": "2026-02-11T14:30:00.000Z",
+  "max_possible": 115,
+  "entries": [
+    {
+      "rank": 1,
+      "team": "vavrek-warriors",
+      "correctness": 40,
+      "performance": 36.2,
+      "bonus": 21,
+      "code_quality": 4.5,
+      "total": 101.7
+    },
+    {
+      "rank": 2,
+      "team": "kopcot-crew",
+      "correctness": 40,
+      "performance": 32.8,
+      "bonus": 16,
+      "code_quality": 4.0,
+      "total": 92.8
+    },
+    {
+      "rank": 3,
+      "team": "slepi-bujaci",
+      "correctness": 36,
+      "performance": 28.5,
+      "bonus": 16,
+      "code_quality": 3.5,
+      "total": 84.0
+    },
+    {
+      "rank": 4,
+      "team": "mnemcik-dev",
+      "correctness": 40,
+      "performance": 24.1,
+      "bonus": 12,
+      "code_quality": 4.0,
+      "total": 80.1
+    },
+    {
+      "rank": 5,
+      "team": "stepan-superstars",
+      "correctness": 36,
+      "performance": 22.0,
+      "bonus": 11,
+      "code_quality": 3.0,
+      "total": 72.0
+    },
+    {
+      "rank": 6,
+      "team": "coders-with-depression",
+      "correctness": 32,
+      "performance": 18.4,
+      "bonus": 9,
+      "code_quality": 3.5,
+      "total": 62.9
+    },
+    {
+      "rank": 7,
+      "team": "hajsak-vojtko-duo",
+      "correctness": 28,
+      "performance": 15.7,
+      "bonus": 5,
+      "code_quality": 2.5,
+      "total": 51.2
+    },
+    {
+      "rank": 8,
+      "team": "mtyrpak-masters",
+      "correctness": 24,
+      "performance": 0,
+      "bonus": 5,
+      "code_quality": 2.0,
+      "total": 31.0
+    },
+    {
+      "rank": 9,
+      "team": "kopil-ctrl-squad",
+      "correctness": 16,
+      "performance": 0,
+      "bonus": 0,
+      "code_quality": 1.5,
+      "total": 17.5
+    },
+    {
+      "rank": 10,
+      "team": "mericko-legends",
+      "correctness": 0,
+      "performance": 0,
+      "bonus": 0,
+      "code_quality": 0,
+      "total": 0
+    }
+  ],
+  "team_details": {
+    "vavrek-warriors": {
+      "team": "vavrek-warriors",
+      "target": "http://localhost:8080",
+      "timestamp": "2026-02-11T13:45:12.000Z",
+      "environment": {
+        "os": "linux",
+        "arch": "x64",
+        "cpus": 4,
+        "cpu_model": "Intel Xeon Platinum 8370C",
+        "total_memory_mb": 16384,
+        "free_memory_mb": 12800,
+        "load_avg_1m": 0.3,
+        "load_avg_5m": 0.2,
+        "load_avg_15m": 0.1,
+        "node_version": "v20.11.0"
+      },
+      "correctness": {
+        "total": 40,
+        "max": 40,
+        "scenarios": [
+          { "id": "C01", "name": "Basic dossier creation", "passed": true, "points": 3, "max_points": 3, "errors": [], "response_time_ms": 2.1 },
+          { "id": "C02", "name": "Add single policy", "passed": true, "points": 3, "max_points": 3, "errors": [], "response_time_ms": 1.8 },
+          { "id": "C03", "name": "Retirement calculation", "passed": true, "points": 5, "max_points": 5, "errors": [], "response_time_ms": 3.2 },
+          { "id": "C04", "name": "Multiple policies", "passed": true, "points": 5, "max_points": 5, "errors": [], "response_time_ms": 4.1 },
+          { "id": "C05", "name": "Indexation", "passed": true, "points": 4, "max_points": 4, "errors": [], "response_time_ms": 3.5 },
+          { "id": "C06", "name": "Part-time factor", "passed": true, "points": 4, "max_points": 4, "errors": [], "response_time_ms": 2.9 },
+          { "id": "C07", "name": "Error handling - invalid mutation", "passed": true, "points": 4, "max_points": 4, "errors": [], "response_time_ms": 1.5 },
+          { "id": "C08", "name": "Complex multi-policy", "passed": true, "points": 4, "max_points": 4, "errors": [], "response_time_ms": 5.8 },
+          { "id": "C09", "name": "Filtered indexation", "passed": true, "points": 4, "max_points": 4, "errors": [], "response_time_ms": 4.2 },
+          { "id": "C10", "name": "Edge cases", "passed": true, "points": 4, "max_points": 4, "errors": [], "response_time_ms": 3.1 }
+        ]
+      },
+      "performance": {
+        "simple_latency": { "mean_ms": 0.42, "median_ms": 0.38, "p95_ms": 0.81, "p99_ms": 1.2, "min_ms": 0.21, "max_ms": 3.5, "sample_count": 1000 },
+        "complex_latency": { "mean_ms": 2.1, "median_ms": 1.9, "p95_ms": 4.2, "p99_ms": 6.8, "min_ms": 1.1, "max_ms": 12.3, "sample_count": 500 },
+        "throughput": { "requests_per_second": 14200, "duration_seconds": 15, "total_requests": 213000, "error_count": 0, "error_rate": 0 },
+        "concurrency": { "concurrency_level": 50, "mean_ms": 3.8, "p99_ms": 12.1, "error_count": 0 },
+        "relative_scores": {
+          "simple_latency_score": 10.0,
+          "complex_latency_score": 10.0,
+          "throughput_score": 10.0,
+          "concurrency_score": 6.2,
+          "total": 36.2
+        }
+      },
+      "bonus": {
+        "total": 21,
+        "max": 30,
+        "forward_json_patch": { "passed": true, "points": 7 },
+        "backward_json_patch": { "passed": true, "points": 4 },
+        "clean_architecture": { "common_interface": 1, "per_mutation_implementation": 1, "generic_dispatch": 1, "extensibility": 1, "points": 4 },
+        "cold_start": { "time_ms": 380, "points": 5 },
+        "scheme_registry": { "passed": false, "points": 0 },
+        "project_future_benefits": { "passed": true, "points": 5 }
+      },
+      "code_quality": {
+        "readability_and_organization": 1.8,
+        "error_handling": 1.3,
+        "project_structure": 1.4,
+        "points": 4.5,
+        "skipped": false
+      },
+      "total": { "scored": 101.7, "max_scoreable_by_tool": 115, "manual_pending": 0 }
+    },
+    "kopcot-crew": {
+      "team": "kopcot-crew",
+      "target": "http://localhost:8080",
+      "timestamp": "2026-02-11T13:20:45.000Z",
+      "environment": {
+        "os": "linux", "arch": "x64", "cpus": 4, "cpu_model": "Intel Xeon Platinum 8370C",
+        "total_memory_mb": 16384, "free_memory_mb": 13200, "load_avg_1m": 0.2,
+        "load_avg_5m": 0.2, "load_avg_15m": 0.1, "node_version": "v20.11.0"
+      },
+      "correctness": {
+        "total": 40, "max": 40,
+        "scenarios": [
+          { "id": "C01", "name": "Basic dossier creation", "passed": true, "points": 3, "max_points": 3, "errors": [], "response_time_ms": 3.1 },
+          { "id": "C02", "name": "Add single policy", "passed": true, "points": 3, "max_points": 3, "errors": [], "response_time_ms": 2.8 },
+          { "id": "C03", "name": "Retirement calculation", "passed": true, "points": 5, "max_points": 5, "errors": [], "response_time_ms": 4.5 },
+          { "id": "C04", "name": "Multiple policies", "passed": true, "points": 5, "max_points": 5, "errors": [], "response_time_ms": 5.2 },
+          { "id": "C05", "name": "Indexation", "passed": true, "points": 4, "max_points": 4, "errors": [], "response_time_ms": 4.1 },
+          { "id": "C06", "name": "Part-time factor", "passed": true, "points": 4, "max_points": 4, "errors": [], "response_time_ms": 3.8 },
+          { "id": "C07", "name": "Error handling", "passed": true, "points": 4, "max_points": 4, "errors": [], "response_time_ms": 2.2 },
+          { "id": "C08", "name": "Complex multi-policy", "passed": true, "points": 4, "max_points": 4, "errors": [], "response_time_ms": 7.3 },
+          { "id": "C09", "name": "Filtered indexation", "passed": true, "points": 4, "max_points": 4, "errors": [], "response_time_ms": 5.1 },
+          { "id": "C10", "name": "Edge cases", "passed": true, "points": 4, "max_points": 4, "errors": [], "response_time_ms": 4.0 }
+        ]
+      },
+      "performance": {
+        "simple_latency": { "mean_ms": 0.58, "median_ms": 0.51, "p95_ms": 1.1, "p99_ms": 1.8, "min_ms": 0.3, "max_ms": 4.2, "sample_count": 1000 },
+        "complex_latency": { "mean_ms": 3.2, "median_ms": 2.9, "p95_ms": 6.1, "p99_ms": 9.5, "min_ms": 1.5, "max_ms": 15.1, "sample_count": 500 },
+        "throughput": { "requests_per_second": 11800, "duration_seconds": 15, "total_requests": 177000, "error_count": 0, "error_rate": 0 },
+        "concurrency": { "concurrency_level": 50, "mean_ms": 4.5, "p99_ms": 14.2, "error_count": 0 },
+        "relative_scores": {
+          "simple_latency_score": 7.2,
+          "complex_latency_score": 6.6,
+          "throughput_score": 8.3,
+          "concurrency_score": 10.0,
+          "total": 32.8
+        }
+      },
+      "bonus": {
+        "total": 16, "max": 30,
+        "forward_json_patch": { "passed": true, "points": 7 },
+        "backward_json_patch": { "passed": true, "points": 4 },
+        "clean_architecture": { "common_interface": 0, "per_mutation_implementation": 0, "generic_dispatch": 0, "extensibility": 0, "points": 0 },
+        "cold_start": { "time_ms": 720, "points": 3 },
+        "scheme_registry": { "passed": false, "points": 0 },
+        "project_future_benefits": { "passed": false, "points": 0 }
+      },
+      "code_quality": {
+        "readability_and_organization": 1.6, "error_handling": 1.2, "project_structure": 1.2,
+        "points": 4.0, "skipped": false
+      },
+      "total": { "scored": 92.8, "max_scoreable_by_tool": 115, "manual_pending": 0 }
+    },
+    "slepi-bujaci": {
+      "team": "slepi-bujaci",
+      "target": "http://localhost:8080",
+      "timestamp": "2026-02-11T12:55:30.000Z",
+      "environment": {
+        "os": "linux", "arch": "x64", "cpus": 4, "cpu_model": "Intel Xeon Platinum 8370C",
+        "total_memory_mb": 16384, "free_memory_mb": 12400, "load_avg_1m": 0.4,
+        "load_avg_5m": 0.3, "load_avg_15m": 0.2, "node_version": "v20.11.0"
+      },
+      "correctness": {
+        "total": 36, "max": 40,
+        "scenarios": [
+          { "id": "C01", "name": "Basic dossier creation", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C02", "name": "Add single policy", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C03", "name": "Retirement calculation", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C04", "name": "Multiple policies", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C05", "name": "Indexation", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C06", "name": "Part-time factor", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C07", "name": "Error handling", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C08", "name": "Complex multi-policy", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C09", "name": "Filtered indexation", "passed": false, "points": 0, "max_points": 4, "errors": ["Expected indexation to apply only to matching scheme_id"] },
+          { "id": "C10", "name": "Edge cases", "passed": true, "points": 4, "max_points": 4, "errors": [] }
+        ]
+      },
+      "performance": {
+        "simple_latency": { "mean_ms": 0.95, "median_ms": 0.82, "p95_ms": 1.8, "p99_ms": 3.1, "min_ms": 0.42, "max_ms": 6.2, "sample_count": 1000 },
+        "complex_latency": { "mean_ms": 4.8, "median_ms": 4.2, "p95_ms": 9.1, "p99_ms": 13.5, "min_ms": 2.1, "max_ms": 22.0, "sample_count": 500 },
+        "throughput": { "requests_per_second": 8500, "duration_seconds": 15, "total_requests": 127500, "error_count": 12, "error_rate": 0.0001 },
+        "concurrency": { "concurrency_level": 50, "mean_ms": 6.2, "p99_ms": 18.5, "error_count": 0 },
+        "relative_scores": {
+          "simple_latency_score": 4.4,
+          "complex_latency_score": 4.4,
+          "throughput_score": 6.0,
+          "concurrency_score": 7.3,
+          "total": 28.5
+        }
+      },
+      "bonus": {
+        "total": 16, "max": 30,
+        "forward_json_patch": { "passed": true, "points": 7 },
+        "backward_json_patch": { "passed": false, "points": 0 },
+        "clean_architecture": { "common_interface": 1, "per_mutation_implementation": 1, "generic_dispatch": 0, "extensibility": 0, "points": 2 },
+        "cold_start": { "time_ms": 1200, "points": 1 },
+        "scheme_registry": { "passed": true, "points": 5 },
+        "project_future_benefits": { "passed": false, "points": 0 }
+      },
+      "code_quality": {
+        "readability_and_organization": 1.4, "error_handling": 1.0, "project_structure": 1.1,
+        "points": 3.5, "skipped": false
+      },
+      "total": { "scored": 84.0, "max_scoreable_by_tool": 115, "manual_pending": 0 }
+    },
+    "mnemcik-dev": {
+      "team": "mnemcik-dev",
+      "target": "http://localhost:8080",
+      "timestamp": "2026-02-11T14:10:00.000Z",
+      "environment": {
+        "os": "linux", "arch": "x64", "cpus": 4, "cpu_model": "Intel Xeon Platinum 8370C",
+        "total_memory_mb": 16384, "free_memory_mb": 13000, "load_avg_1m": 0.2,
+        "load_avg_5m": 0.2, "load_avg_15m": 0.1, "node_version": "v20.11.0"
+      },
+      "correctness": {
+        "total": 40, "max": 40,
+        "scenarios": [
+          { "id": "C01", "name": "Basic dossier creation", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C02", "name": "Add single policy", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C03", "name": "Retirement calculation", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C04", "name": "Multiple policies", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C05", "name": "Indexation", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C06", "name": "Part-time factor", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C07", "name": "Error handling", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C08", "name": "Complex multi-policy", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C09", "name": "Filtered indexation", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C10", "name": "Edge cases", "passed": true, "points": 4, "max_points": 4, "errors": [] }
+        ]
+      },
+      "performance": {
+        "simple_latency": { "mean_ms": 1.2, "median_ms": 1.0, "p95_ms": 2.5, "p99_ms": 4.2, "min_ms": 0.5, "max_ms": 8.1, "sample_count": 1000 },
+        "complex_latency": { "mean_ms": 5.8, "median_ms": 5.1, "p95_ms": 11.2, "p99_ms": 16.8, "min_ms": 2.8, "max_ms": 28.5, "sample_count": 500 },
+        "throughput": { "requests_per_second": 6200, "duration_seconds": 15, "total_requests": 93000, "error_count": 0, "error_rate": 0 },
+        "concurrency": { "concurrency_level": 50, "mean_ms": 8.1, "p99_ms": 22.3, "error_count": 0 },
+        "relative_scores": {
+          "simple_latency_score": 3.5,
+          "complex_latency_score": 3.6,
+          "throughput_score": 4.4,
+          "concurrency_score": 5.6,
+          "total": 24.1
+        }
+      },
+      "bonus": {
+        "total": 12, "max": 30,
+        "forward_json_patch": { "passed": true, "points": 7 },
+        "backward_json_patch": { "passed": false, "points": 0 },
+        "clean_architecture": { "common_interface": 0, "per_mutation_implementation": 0, "generic_dispatch": 0, "extensibility": 0, "points": 0 },
+        "cold_start": { "time_ms": 920, "points": 3 },
+        "scheme_registry": { "passed": false, "points": 0 },
+        "project_future_benefits": { "passed": false, "points": 0 }
+      },
+      "code_quality": {
+        "readability_and_organization": 1.6, "error_handling": 1.2, "project_structure": 1.2,
+        "points": 4.0, "skipped": false
+      },
+      "total": { "scored": 80.1, "max_scoreable_by_tool": 115, "manual_pending": 0 }
+    },
+    "stepan-superstars": {
+      "team": "stepan-superstars",
+      "target": "http://localhost:8080",
+      "timestamp": "2026-02-11T12:30:15.000Z",
+      "environment": {
+        "os": "linux", "arch": "x64", "cpus": 4, "cpu_model": "Intel Xeon Platinum 8370C",
+        "total_memory_mb": 16384, "free_memory_mb": 12600, "load_avg_1m": 0.3,
+        "load_avg_5m": 0.2, "load_avg_15m": 0.2, "node_version": "v20.11.0"
+      },
+      "correctness": {
+        "total": 36, "max": 40,
+        "scenarios": [
+          { "id": "C01", "name": "Basic dossier creation", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C02", "name": "Add single policy", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C03", "name": "Retirement calculation", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C04", "name": "Multiple policies", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C05", "name": "Indexation", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C06", "name": "Part-time factor", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C07", "name": "Error handling", "passed": false, "points": 0, "max_points": 4, "errors": ["Expected CRITICAL message for duplicate dossier_id"] },
+          { "id": "C08", "name": "Complex multi-policy", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C09", "name": "Filtered indexation", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C10", "name": "Edge cases", "passed": true, "points": 4, "max_points": 4, "errors": [] }
+        ]
+      },
+      "performance": {
+        "simple_latency": { "mean_ms": 1.8, "median_ms": 1.5, "p95_ms": 3.8, "p99_ms": 6.1, "min_ms": 0.8, "max_ms": 12.5, "sample_count": 1000 },
+        "complex_latency": { "mean_ms": 8.2, "median_ms": 7.1, "p95_ms": 15.8, "p99_ms": 22.1, "min_ms": 3.5, "max_ms": 35.2, "sample_count": 500 },
+        "throughput": { "requests_per_second": 4800, "duration_seconds": 15, "total_requests": 72000, "error_count": 5, "error_rate": 0.00007 },
+        "concurrency": { "concurrency_level": 50, "mean_ms": 10.5, "p99_ms": 28.1, "error_count": 0 },
+        "relative_scores": {
+          "simple_latency_score": 2.3,
+          "complex_latency_score": 2.6,
+          "throughput_score": 3.4,
+          "concurrency_score": 4.3,
+          "total": 22.0
+        }
+      },
+      "bonus": {
+        "total": 11, "max": 30,
+        "forward_json_patch": { "passed": true, "points": 7 },
+        "backward_json_patch": { "passed": false, "points": 0 },
+        "clean_architecture": { "common_interface": 0, "per_mutation_implementation": 1, "generic_dispatch": 0, "extensibility": 0, "points": 1 },
+        "cold_start": { "time_ms": 1800, "points": 1 },
+        "scheme_registry": { "passed": false, "points": 0 },
+        "project_future_benefits": { "passed": false, "points": 0 }
+      },
+      "code_quality": {
+        "readability_and_organization": 1.2, "error_handling": 0.8, "project_structure": 1.0,
+        "points": 3.0, "skipped": false
+      },
+      "total": { "scored": 72.0, "max_scoreable_by_tool": 115, "manual_pending": 0 }
+    },
+    "coders-with-depression": {
+      "team": "coders-with-depression",
+      "target": "http://localhost:8080",
+      "timestamp": "2026-02-11T12:05:00.000Z",
+      "environment": {
+        "os": "linux", "arch": "x64", "cpus": 4, "cpu_model": "Intel Xeon Platinum 8370C",
+        "total_memory_mb": 16384, "free_memory_mb": 12200, "load_avg_1m": 0.5,
+        "load_avg_5m": 0.3, "load_avg_15m": 0.2, "node_version": "v20.11.0"
+      },
+      "correctness": {
+        "total": 32, "max": 40,
+        "scenarios": [
+          { "id": "C01", "name": "Basic dossier creation", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C02", "name": "Add single policy", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C03", "name": "Retirement calculation", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C04", "name": "Multiple policies", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C05", "name": "Indexation", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C06", "name": "Part-time factor", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C07", "name": "Error handling", "passed": false, "points": 0, "max_points": 4, "errors": ["Missing CRITICAL message"] },
+          { "id": "C08", "name": "Complex multi-policy", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C09", "name": "Filtered indexation", "passed": false, "points": 0, "max_points": 4, "errors": ["Indexation applied to wrong policies"] },
+          { "id": "C10", "name": "Edge cases", "passed": true, "points": 4, "max_points": 4, "errors": [] }
+        ]
+      },
+      "performance": {
+        "simple_latency": { "mean_ms": 2.5, "median_ms": 2.1, "p95_ms": 5.2, "p99_ms": 8.3, "min_ms": 1.1, "max_ms": 15.2, "sample_count": 1000 },
+        "complex_latency": { "mean_ms": 12.1, "median_ms": 10.5, "p95_ms": 22.8, "p99_ms": 35.1, "min_ms": 5.2, "max_ms": 52.3, "sample_count": 500 },
+        "throughput": { "requests_per_second": 3500, "duration_seconds": 15, "total_requests": 52500, "error_count": 28, "error_rate": 0.0005 },
+        "concurrency": { "concurrency_level": 50, "mean_ms": 14.2, "p99_ms": 38.5, "error_count": 3 },
+        "relative_scores": {
+          "simple_latency_score": 1.7,
+          "complex_latency_score": 1.7,
+          "throughput_score": 2.5,
+          "concurrency_score": 3.2,
+          "total": 18.4
+        }
+      },
+      "bonus": {
+        "total": 9, "max": 30,
+        "forward_json_patch": { "passed": true, "points": 7 },
+        "backward_json_patch": { "passed": false, "points": 0 },
+        "clean_architecture": { "common_interface": 0, "per_mutation_implementation": 0, "generic_dispatch": 0, "extensibility": 0, "points": 0 },
+        "cold_start": { "time_ms": 2500, "points": 1 },
+        "scheme_registry": { "passed": false, "points": 0 },
+        "project_future_benefits": { "passed": false, "points": 0 }
+      },
+      "code_quality": {
+        "readability_and_organization": 1.4, "error_handling": 1.0, "project_structure": 1.1,
+        "points": 3.5, "skipped": false
+      },
+      "total": { "scored": 62.9, "max_scoreable_by_tool": 115, "manual_pending": 0 }
+    },
+    "hajsak-vojtko-duo": {
+      "team": "hajsak-vojtko-duo",
+      "target": "http://localhost:8080",
+      "timestamp": "2026-02-11T11:40:00.000Z",
+      "environment": {
+        "os": "linux", "arch": "x64", "cpus": 4, "cpu_model": "Intel Xeon Platinum 8370C",
+        "total_memory_mb": 16384, "free_memory_mb": 11800, "load_avg_1m": 0.6,
+        "load_avg_5m": 0.4, "load_avg_15m": 0.3, "node_version": "v20.11.0"
+      },
+      "correctness": {
+        "total": 28, "max": 40,
+        "scenarios": [
+          { "id": "C01", "name": "Basic dossier creation", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C02", "name": "Add single policy", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C03", "name": "Retirement calculation", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C04", "name": "Multiple policies", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C05", "name": "Indexation", "passed": false, "points": 0, "max_points": 4, "errors": ["Wrong indexation amount"] },
+          { "id": "C06", "name": "Part-time factor", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C07", "name": "Error handling", "passed": false, "points": 0, "max_points": 4, "errors": ["No CRITICAL message generated"] },
+          { "id": "C08", "name": "Complex multi-policy", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C09", "name": "Filtered indexation", "passed": false, "points": 0, "max_points": 4, "errors": ["Filtering not implemented"] },
+          { "id": "C10", "name": "Edge cases", "passed": true, "points": 4, "max_points": 4, "errors": [] }
+        ]
+      },
+      "performance": {
+        "simple_latency": { "mean_ms": 3.2, "median_ms": 2.8, "p95_ms": 6.5, "p99_ms": 10.2, "min_ms": 1.5, "max_ms": 18.5, "sample_count": 1000 },
+        "complex_latency": { "mean_ms": 15.8, "median_ms": 13.5, "p95_ms": 28.5, "p99_ms": 42.1, "min_ms": 7.2, "max_ms": 65.3, "sample_count": 500 },
+        "throughput": { "requests_per_second": 2800, "duration_seconds": 15, "total_requests": 42000, "error_count": 45, "error_rate": 0.001 },
+        "concurrency": { "concurrency_level": 50, "mean_ms": 18.5, "p99_ms": 48.2, "error_count": 5 },
+        "relative_scores": {
+          "simple_latency_score": 1.3,
+          "complex_latency_score": 1.3,
+          "throughput_score": 2.0,
+          "concurrency_score": 2.5,
+          "total": 15.7
+        }
+      },
+      "bonus": {
+        "total": 5, "max": 30,
+        "forward_json_patch": { "passed": false, "points": 0 },
+        "backward_json_patch": { "passed": false, "points": 0 },
+        "clean_architecture": { "common_interface": 0, "per_mutation_implementation": 0, "generic_dispatch": 0, "extensibility": 0, "points": 0 },
+        "cold_start": { "time_ms": 450, "points": 5 },
+        "scheme_registry": { "passed": false, "points": 0 },
+        "project_future_benefits": { "passed": false, "points": 0 }
+      },
+      "code_quality": {
+        "readability_and_organization": 1.0, "error_handling": 0.8, "project_structure": 0.7,
+        "points": 2.5, "skipped": false
+      },
+      "total": { "scored": 51.2, "max_scoreable_by_tool": 115, "manual_pending": 0 }
+    },
+    "mtyrpak-masters": {
+      "team": "mtyrpak-masters",
+      "target": "http://localhost:8080",
+      "timestamp": "2026-02-11T11:15:00.000Z",
+      "environment": {
+        "os": "linux", "arch": "x64", "cpus": 4, "cpu_model": "Intel Xeon Platinum 8370C",
+        "total_memory_mb": 16384, "free_memory_mb": 12000, "load_avg_1m": 0.3,
+        "load_avg_5m": 0.3, "load_avg_15m": 0.2, "node_version": "v20.11.0"
+      },
+      "correctness": {
+        "total": 24, "max": 40,
+        "scenarios": [
+          { "id": "C01", "name": "Basic dossier creation", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C02", "name": "Add single policy", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C03", "name": "Retirement calculation", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C04", "name": "Multiple policies", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C05", "name": "Indexation", "passed": false, "points": 0, "max_points": 4, "errors": ["Indexation not implemented"] },
+          { "id": "C06", "name": "Part-time factor", "passed": false, "points": 0, "max_points": 4, "errors": ["Part-time factor ignored"] },
+          { "id": "C07", "name": "Error handling", "passed": false, "points": 0, "max_points": 4, "errors": ["No error handling"] },
+          { "id": "C08", "name": "Complex multi-policy", "passed": true, "points": 4, "max_points": 4, "errors": [] },
+          { "id": "C09", "name": "Filtered indexation", "passed": false, "points": 0, "max_points": 4, "errors": ["Depends on C05"] },
+          { "id": "C10", "name": "Edge cases", "passed": true, "points": 4, "max_points": 4, "errors": [] }
+        ]
+      },
+      "performance": {
+        "simple_latency": null,
+        "complex_latency": null,
+        "throughput": null,
+        "concurrency": null,
+        "relative_scores": null
+      },
+      "bonus": {
+        "total": 5, "max": 30,
+        "forward_json_patch": { "passed": false, "points": 0 },
+        "backward_json_patch": { "passed": false, "points": 0 },
+        "clean_architecture": { "common_interface": 0, "per_mutation_implementation": 0, "generic_dispatch": 0, "extensibility": 0, "points": 0 },
+        "cold_start": { "time_ms": 680, "points": 3 },
+        "scheme_registry": { "passed": false, "points": 0 },
+        "project_future_benefits": { "passed": false, "points": 0 }
+      },
+      "code_quality": {
+        "readability_and_organization": 0.8, "error_handling": 0.5, "project_structure": 0.7,
+        "points": 2.0, "skipped": false
+      },
+      "total": { "scored": 31.0, "max_scoreable_by_tool": 115, "manual_pending": 0 }
+    },
+    "kopil-ctrl-squad": {
+      "team": "kopil-ctrl-squad",
+      "target": "http://localhost:8080",
+      "timestamp": "2026-02-11T10:50:00.000Z",
+      "environment": {
+        "os": "linux", "arch": "x64", "cpus": 4, "cpu_model": "Intel Xeon Platinum 8370C",
+        "total_memory_mb": 16384, "free_memory_mb": 13500, "load_avg_1m": 0.1,
+        "load_avg_5m": 0.1, "load_avg_15m": 0.1, "node_version": "v20.11.0"
+      },
+      "correctness": {
+        "total": 16, "max": 40,
+        "scenarios": [
+          { "id": "C01", "name": "Basic dossier creation", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C02", "name": "Add single policy", "passed": true, "points": 3, "max_points": 3, "errors": [] },
+          { "id": "C03", "name": "Retirement calculation", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C04", "name": "Multiple policies", "passed": true, "points": 5, "max_points": 5, "errors": [] },
+          { "id": "C05", "name": "Indexation", "passed": false, "points": 0, "max_points": 4, "errors": ["Not implemented"] },
+          { "id": "C06", "name": "Part-time factor", "passed": false, "points": 0, "max_points": 4, "errors": ["Not implemented"] },
+          { "id": "C07", "name": "Error handling", "passed": false, "points": 0, "max_points": 4, "errors": ["Not implemented"] },
+          { "id": "C08", "name": "Complex multi-policy", "passed": false, "points": 0, "max_points": 4, "errors": ["Calculation error"] },
+          { "id": "C09", "name": "Filtered indexation", "passed": false, "points": 0, "max_points": 4, "errors": ["Not implemented"] },
+          { "id": "C10", "name": "Edge cases", "passed": false, "points": 0, "max_points": 4, "errors": ["Not implemented"] }
+        ]
+      },
+      "performance": {
+        "simple_latency": null, "complex_latency": null, "throughput": null, "concurrency": null, "relative_scores": null
+      },
+      "bonus": {
+        "total": 0, "max": 30,
+        "forward_json_patch": { "passed": false, "points": 0 },
+        "backward_json_patch": { "passed": false, "points": 0 },
+        "clean_architecture": { "common_interface": 0, "per_mutation_implementation": 0, "generic_dispatch": 0, "extensibility": 0, "points": 0 },
+        "cold_start": { "time_ms": 3500, "points": 0 },
+        "scheme_registry": { "passed": false, "points": 0 },
+        "project_future_benefits": { "passed": false, "points": 0 }
+      },
+      "code_quality": {
+        "readability_and_organization": 0.6, "error_handling": 0.4, "project_structure": 0.5,
+        "points": 1.5, "skipped": false
+      },
+      "total": { "scored": 17.5, "max_scoreable_by_tool": 115, "manual_pending": 0 }
+    },
+    "mericko-legends": {
+      "team": "mericko-legends",
+      "target": "http://localhost:8080",
+      "timestamp": "2026-02-11T10:30:00.000Z",
+      "error": "Docker build failed",
+      "environment": {
+        "os": "linux", "arch": "x64", "cpus": 4, "cpu_model": "Intel Xeon Platinum 8370C",
+        "total_memory_mb": 16384, "free_memory_mb": 14000, "load_avg_1m": 0.1,
+        "load_avg_5m": 0.1, "load_avg_15m": 0.1, "node_version": "v20.11.0"
+      },
+      "correctness": { "total": 0, "max": 40, "scenarios": [] },
+      "performance": { "simple_latency": null, "complex_latency": null, "throughput": null, "concurrency": null, "relative_scores": null },
+      "bonus": {
+        "total": 0, "max": 30,
+        "forward_json_patch": { "passed": false, "points": 0 },
+        "backward_json_patch": { "passed": false, "points": 0 },
+        "clean_architecture": { "common_interface": 0, "per_mutation_implementation": 0, "generic_dispatch": 0, "extensibility": 0, "points": 0 },
+        "cold_start": { "time_ms": null, "points": 0 },
+        "scheme_registry": { "passed": false, "points": 0 },
+        "project_future_benefits": { "passed": false, "points": 0 }
+      },
+      "code_quality": { "readability_and_organization": 0, "error_handling": 0, "project_structure": 0, "points": 0, "skipped": true },
+      "total": { "scored": 0, "max_scoreable_by_tool": 115, "manual_pending": 0 }
+    }
+  }
+}

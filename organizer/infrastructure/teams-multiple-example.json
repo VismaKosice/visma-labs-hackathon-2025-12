@@ -1,0 +1,14 @@
+[
+  {
+    "name": "alpha",
+    "github_usernames": ["alice", "bob"]
+  },
+  {
+    "name": "beta",
+    "github_usernames": ["charlie"]
+  },
+  {
+    "name": "gamma",
+    "github_usernames": ["dave", "eve", "frank"]
+  }
+]

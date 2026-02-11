@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visma Performance Hackathon — Leaderboard</title>
+<style>
+  :root {
+    --bg-primary: #0f1117;
+    --bg-secondary: #1a1d27;
+    --bg-card: #222632;
+    --bg-hover: #2a2e3c;
+    --bg-expanded: #1e2230;
+    --border: #2e3345;
+    --text-primary: #e8eaf0;
+    --text-secondary: #8b90a0;
+    --text-muted: #5a5f73;
+    --accent: #4f8cff;
+    --accent-glow: rgba(79, 140, 255, 0.15);
+    --gold: #ffd700;
+    --gold-bg: rgba(255, 215, 0, 0.08);
+    --silver: #c0c0c0;
+    --silver-bg: rgba(192, 192, 192, 0.06);
+    --bronze: #cd7f32;
+    --bronze-bg: rgba(205, 127, 50, 0.06);
+    --green: #34d399;
+    --green-bg: rgba(52, 211, 153, 0.12);
+    --red: #f87171;
+    --red-bg: rgba(248, 113, 113, 0.12);
+    --orange: #fb923c;
+    --purple: #a78bfa;
+    --bar-bg: #2a2e3c;
+    --bar-correctness: #34d399;
+    --bar-performance: #4f8cff;
+    --bar-bonus: #fb923c;
+    --bar-quality: #a78bfa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header-logo {
+    height: 32px;
+    opacity: 0.9;
+  }
+
+  .header-title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .nav-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .nav-link:hover { background: rgba(79, 140, 255, 0.12); }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+  }
+  .status-dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.stale { background: var(--orange); }
+  .status-dot.offline { background: var(--red); }
+
+  .refresh-countdown {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Main container */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  /* Summary cards */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .summary-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+
+  .summary-card .label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .summary-card .value {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .summary-card .sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Leaderboard table */
+  .leaderboard {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .leaderboard-header {
+    display: grid;
+    grid-template-columns: 56px 1fr 90px 90px 90px 80px 100px;
+    padding: 12px 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+
+  .leaderboard-header > div:nth-child(n+3) {
+    text-align: right;
+  }
+
+  .team-row {
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .team-row:last-child { border-bottom: none; }
+  .team-row:hover .team-row-main { background: var(--bg-hover); }
+
+  .team-row-main {
+    display: grid;
+    grid-template-columns: 56px 1fr 90px 90px 90px 80px 100px;
+    padding: 14px 20px;
+    align-items: center;
+    transition: background 0.15s;
+  }
+
+  .team-row.rank-1 .team-row-main { background: var(--gold-bg); }
+  .team-row.rank-2 .team-row-main { background: var(--silver-bg); }
+  .team-row.rank-3 .team-row-main { background: var(--bronze-bg); }
+
+  .rank-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+
+  .rank-1 .rank-badge { background: var(--gold); color: #1a1400; border-color: var(--gold); }
+  .rank-2 .rank-badge { background: var(--silver); color: #1a1a1a; border-color: var(--silver); }
+  .rank-3 .rank-badge { background: var(--bronze); color: #1a1000; border-color: var(--bronze); }
+
+  .team-name {
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tech-stack-badge {
+    display: inline-block;
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(79, 140, 255, 0.3);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .team-timestamp {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .score-cell {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .score-value {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .score-max {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .total-score {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: right;
+    color: var(--accent);
+  }
+
+  .score-bar-container {
+    height: 3px;
+    background: var(--bar-bg);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  .score-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  .bar-correctness { background: var(--bar-correctness); }
+  .bar-performance { background: var(--bar-performance); }
+  .bar-bonus { background: var(--bar-bonus); }
+  .bar-quality { background: var(--bar-quality); }
+
+  .best-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 4px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .best-badge.best { background: var(--green-bg); color: var(--green); }
+
+  /* Expanded details */
+  .team-details {
+    display: none;
+    padding: 0 20px 20px 20px;
+    background: var(--bg-expanded);
+    border-top: 1px solid var(--border);
+  }
+
+  .team-row.expanded .team-details { display: block; }
+  .team-row.expanded .team-row-main .expand-icon { transform: rotate(180deg); }
+
+  .expand-icon {
+    font-size: 10px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+    margin-left: 4px;
+  }
+
+  .details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .details-grid { grid-template-columns: 1fr; }
+    .leaderboard-header,
+    .team-row-main {
+      grid-template-columns: 40px 1fr 70px 70px 70px 60px 80px;
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+  }
+
+  .detail-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .detail-section h4 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 13px;
+  }
+
+  .detail-row .label { color: var(--text-secondary); }
+  .detail-row .value { font-weight: 500; font-variant-numeric: tabular-nums; }
+  .detail-row .pass { color: var(--green); }
+  .detail-row .fail { color: var(--red); }
+
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 6px;
+  }
+
+  .scenario-chip {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .scenario-chip.pass { background: var(--green-bg); color: var(--green); }
+  .scenario-chip.fail { background: var(--red-bg); color: var(--red); }
+
+  /* Error state */
+  .team-error {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .team-error-badge {
+    background: var(--red-bg);
+    color: var(--red);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .team-error-msg {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-secondary);
+  }
+
+  .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+
+  .empty-state h2 {
+    font-size: 20px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .pulse {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* Loading shimmer */
+  .shimmer {
+    background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-hover) 50%, var(--bg-card) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Tooltip styles */
+  .tooltip-trigger {
+    position: relative;
+  }
+
+  .tooltip-trigger:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: normal;
+    width: 250px;
+    z-index: 1000;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    margin-bottom: 4px;
+    line-height: 1.4;
+    pointer-events: none;
+  }
+
+  .reasoning-text {
+    border-left: 2px solid var(--border);
+    padding-left: 8px !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <svg class="header-logo" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="700" fill="#e8eaf0">visma</text>
+    </svg>
+    <div>
+      <div class="header-title">Performance Hackathon</div>
+      <div class="header-subtitle">Pension Calculation Engine Challenge</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <a href="submissions.html" class="nav-link">Submissions &rarr;</a>
+    <span id="status-indicator">
+      <span class="status-dot offline"></span>
+      <span id="status-text">Connecting...</span>
+    </span>
+    <span class="refresh-countdown" id="countdown"></span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="summary-cards" id="summary-cards">
+    <div class="summary-card">
+      <div class="label">Teams</div>
+      <div class="value" id="stat-teams">--</div>
+      <div class="sub">registered</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Tested</div>
+      <div class="value" id="stat-tested">--</div>
+      <div class="sub">with results</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Top Score</div>
+      <div class="value" id="stat-top">--</div>
+      <div class="sub">out of 115</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Last Update</div>
+      <div class="value" id="stat-updated">--</div>
+      <div class="sub" id="stat-updated-sub">--</div>
+    </div>
+  </div>
+
+  <div class="leaderboard" id="leaderboard">
+    <div class="leaderboard-header">
+      <div>Rank</div>
+      <div>Team</div>
+      <div>Correct</div>
+      <div>Perf</div>
+      <div>Bonus</div>
+      <div>Quality</div>
+      <div>Total</div>
+    </div>
+    <div id="leaderboard-body">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-state-icon pulse">&#9203;</div>
+        <h2>Waiting for results...</h2>
+        <p>The leaderboard will update automatically as teams submit their code and tests complete.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // Configuration
+  const REFRESH_INTERVAL_MS = 15000;
+  const DATA_URL = getDataUrl();
+  let countdownTimer = null;
+  let lastData = null;
+  let bestScores = {};
+
+  function getDataUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const base = params.get('results') || '.';
+    return base.replace(/\/$/, '') + '/leaderboard.json';
+  }
+
+  // ── Data fetching ──────────────────────────────────────────────
+
+  async function fetchLeaderboard() {
+    try {
+      const resp = await fetch(DATA_URL + '?t=' + Date.now());
+      if (!resp.ok) {
+        setStatus('offline', 'No data yet');
+        return null;
+      }
+      const data = await resp.json();
+      setStatus('live', 'Live');
+      return data;
+    } catch (e) {
+      setStatus('offline', 'Offline');
+      return null;
+    }
+  }
+
+  // ── Rendering ──────────────────────────────────────────────────
+
+  function render(data) {
+    if (!data || !data.entries || data.entries.length === 0) {
+      document.getElementById('leaderboard-body').innerHTML = `
+        <div class="empty-state" id="empty-state">
+          <div class="empty-state-icon pulse">&#9203;</div>
+          <h2>Waiting for results...</h2>
+          <p>The leaderboard will update automatically as teams submit their code and tests complete.</p>
+        </div>`;
+      return;
+    }
+
+    lastData = data;
+    computeBestScores(data);
+    renderSummary(data);
+    renderTable(data);
+  }
+
+  function computeBestScores(data) {
+    bestScores = { correctness: 0, performance: 0, bonus: 0, code_quality: 0, total: 0 };
+    for (const entry of data.entries) {
+      if (entry.correctness > bestScores.correctness) bestScores.correctness = entry.correctness;
+      if (entry.performance > bestScores.performance) bestScores.performance = entry.performance;
+      if (entry.bonus > bestScores.bonus) bestScores.bonus = entry.bonus;
+      if (entry.code_quality > bestScores.code_quality) bestScores.code_quality = entry.code_quality;
+      if (entry.total > bestScores.total) bestScores.total = entry.total;
+    }
+  }
+
+  function renderSummary(data) {
+    const testedCount = data.entries.filter(e => !data.team_details?.[e.team]?.error).length;
+    const topScore = data.entries.length > 0 ? data.entries[0].total : 0;
+    const updated = new Date(data.generated_at);
+
+    document.getElementById('stat-teams').textContent = data.entries.length;
+    document.getElementById('stat-tested').textContent = testedCount;
+    document.getElementById('stat-top').textContent = topScore.toFixed(1);
+    document.getElementById('stat-updated').textContent = formatTime(updated);
+    document.getElementById('stat-updated-sub').textContent = formatDate(updated);
+  }
+
+  function renderTable(data) {
+    const body = document.getElementById('leaderboard-body');
+    // Preserve expanded state
+    const expandedTeams = new Set();
+    body.querySelectorAll('.team-row.expanded').forEach(el => {
+      expandedTeams.add(el.dataset.team);
+    });
+
+    let html = '';
+
+    for (const entry of data.entries) {
+      const detail = data.team_details?.[entry.team];
+      const hasError = detail?.error;
+      const rankClass = entry.rank <= 3 ? ` rank-${entry.rank}` : '';
+      const expandedClass = expandedTeams.has(entry.team) ? ' expanded' : '';
+
+      html += `<div class="team-row${rankClass}${expandedClass}" data-team="${esc(entry.team)}" onclick="toggleExpand(this)">`;
+      html += `<div class="team-row-main">`;
+
+      // Rank
+      html += `<div><div class="rank-badge">${entry.rank}</div></div>`;
+
+      // Team name with technology stack badge
+      const techStack = detail?.technology_stack;
+      let techStackHtml = '';
+      if (techStack) {
+        techStackHtml = `<span class="tech-stack-badge" title="Technology Stack: ${esc(techStack)}">${esc(techStack)}</span>`;
+      }
+      html += `<div>
+        <div class="team-name">
+          ${esc(entry.team)}
+          ${techStackHtml}
+          <span class="expand-icon">&#9660;</span>
+        </div>
+        <div class="team-timestamp">
+          ${detail?.timestamp ? `Tested ${formatRelative(new Date(detail.timestamp))}` : ''}
+          ${hasError ? `<span style="color:var(--red)">${esc(detail.error)}</span>` : ''}
+          <a href="submissions.html?team=${encodeURIComponent(entry.team)}" onclick="event.stopPropagation()" style="color:var(--accent);margin-left:8px;text-decoration:none;font-size:11px">history</a>
+        </div>
+      </div>`;
+
+      // Score cells
+      html += scoreCell(entry.correctness, 40, 'correctness', 'bar-correctness');
+      html += scoreCell(entry.performance, 40, 'performance', 'bar-performance');
+      html += scoreCell(entry.bonus, 30, 'bonus', 'bar-bonus');
+      html += scoreCell(entry.code_quality, 5, 'code_quality', 'bar-quality');
+
+      // Total
+      const totalIsBest = isBest('total', entry.total);
+      const totalStyle = totalIsBest ? ' style="color:var(--green);font-weight:600"' : '';
+      html += `<div class="total-score"><span${totalStyle}>${entry.total.toFixed(1)}</span></div>`;
+
+      html += `</div>`; // team-row-main
+
+      // Expanded details
+      html += `<div class="team-details">`;
+      if (detail && !hasError) {
+        html += renderDetails(detail);
+      } else if (hasError) {
+        html += `<div class="team-error">
+          <span class="team-error-badge">ERROR</span>
+          <span class="team-error-msg">${esc(detail.error)}</span>
+        </div>`;
+      }
+      html += `</div>`; // team-details
+
+      html += `</div>`; // team-row
+    }
+
+    body.innerHTML = html;
+    
+    // Restore expanded state after DOM update
+    expandedTeams.forEach(team => {
+      const row = body.querySelector(`[data-team="${team}"]`);
+      if (row) {
+        row.classList.add('expanded');
+      }
+    });
+  }
+
+  function scoreCell(value, max, category, barClass) {
+    const pct = max > 0 ? (value / max * 100) : 0;
+    const best = isBest(category, value);
+    const valueStyle = best ? ' style="color:var(--green);font-weight:600"' : '';
+    return `<div class="score-cell">
+      <span class="score-value"${valueStyle}>${value.toFixed(category === 'code_quality' ? 1 : 0)}</span>
+      <span class="score-max">/${max}</span>
+      <div class="score-bar-container"><div class="score-bar ${barClass}" style="width:${pct}%"></div></div>
+    </div>`;
+  }
+
+  function isBest(category, value) {
+    return value > 0 && value >= bestScores[category];
+  }
+
+  function bestBadge() {
+    return '<span class="best-badge best">Best</span>';
+  }
+
+  function renderDetails(detail) {
+    let html = '<div class="details-grid">';
+
+    // Correctness scenarios
+    if (detail.correctness?.scenarios?.length > 0) {
+      html += `<div class="detail-section">
+        <h4>Correctness Scenarios (${detail.correctness.total}/${detail.correctness.max})</h4>
+        <div class="scenario-grid">`;
+      for (const s of detail.correctness.scenarios) {
+        const cls = s.passed ? 'pass' : 'fail';
+        html += `<div class="scenario-chip ${cls}" title="${esc(s.name)}${s.errors?.length ? '\n' + s.errors.join('\n') : ''}">${esc(s.id)} ${s.passed ? '&#10003;' : '&#10007;'} ${s.points}/${s.max_points}</div>`;
+      }
+      html += `</div></div>`;
+    }
+
+    // Performance
+    html += `<div class="detail-section"><h4>Performance</h4>`;
+    if (detail.performance?.simple_latency) {
+      html += detailRow('Simple Latency (mean)', fmtMs(detail.performance.simple_latency.mean_ms));
+      html += detailRow('Simple Latency (p95)', fmtMs(detail.performance.simple_latency.p95_ms));
+    }
+    if (detail.performance?.complex_latency) {
+      html += detailRow('Complex Latency (mean)', fmtMs(detail.performance.complex_latency.mean_ms));
+      html += detailRow('Complex Latency (p95)', fmtMs(detail.performance.complex_latency.p95_ms));
+    }
+    if (detail.performance?.throughput) {
+      html += detailRow('Throughput', fmtNum(detail.performance.throughput.requests_per_second) + ' req/s');
+      if (detail.performance.throughput.error_rate > 0) {
+        html += detailRow('Error Rate', (detail.performance.throughput.error_rate * 100).toFixed(1) + '%');
+      }
+    }
+    if (detail.performance?.concurrency) {
+      html += detailRow('Concurrency (mean)', fmtMs(detail.performance.concurrency.mean_ms));
+      html += detailRow('Concurrency Level', detail.performance.concurrency.concurrency_level);
+    }
+    if (detail.performance?.relative_scores) {
+      const rs = detail.performance.relative_scores;
+      html += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">`;
+      html += detailRow('Simple Score', rs.simple_latency_score.toFixed(1) + '/10');
+      html += detailRow('Complex Score', rs.complex_latency_score.toFixed(1) + '/10');
+      html += detailRow('Throughput Score', rs.throughput_score.toFixed(1) + '/10');
+      html += detailRow('Concurrency Score', rs.concurrency_score.toFixed(1) + '/10');
+      html += `</div>`;
+    }
+    if (!detail.performance?.simple_latency && !detail.performance?.complex_latency) {
+      html += `<div class="detail-row"><span class="label" style="color:var(--text-muted)">No performance data (correctness tests must pass first)</span></div>`;
+    }
+    html += `</div>`;
+
+    // Bonus
+    html += `<div class="detail-section"><h4>Bonus Features (${detail.bonus.total}/${detail.bonus.max})</h4>`;
+    html += bonusRow('Forward JSON Patch', detail.bonus.forward_json_patch);
+    html += bonusRow('Backward JSON Patch', detail.bonus.backward_json_patch);
+    if (detail.bonus.project_future_benefits) {
+      html += bonusRow('Future Benefits', detail.bonus.project_future_benefits);
+    }
+    if (detail.bonus.scheme_registry) {
+      html += bonusRow('Scheme Registry', detail.bonus.scheme_registry);
+    }
+    if (detail.bonus.cold_start) {
+      const cs = detail.bonus.cold_start;
+      html += detailRow('Cold Start', cs.time_ms != null ? fmtMs(cs.time_ms) + ` (${cs.points} pts)` : 'N/A');
+    }
+    if (detail.bonus.clean_architecture) {
+      const ca = detail.bonus.clean_architecture;
+      const caReasoning = ca.reasoning || {};
+      html += detailRowWithTooltip(
+        'Clean Architecture', 
+        ca.points + ' pts',
+        'Clean Mutation Architecture: Evaluates whether mutations use a proper extensible architecture (common interface, per-mutation implementations, generic dispatch, extensibility) rather than hardcoded conditional logic.',
+        ''
+      );
+      
+      // Show individual clean architecture criteria with reasoning
+      if (caReasoning.common_interface !== undefined || caReasoning.per_mutation_implementation !== undefined || 
+          caReasoning.generic_dispatch !== undefined || caReasoning.extensibility !== undefined) {
+        html += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px">`;
+        html += `<div style="color:var(--text-secondary);margin-bottom:6px;font-weight:600">Architecture Details:</div>`;
+        
+        if (caReasoning.common_interface !== undefined) {
+          html += detailRowWithTooltip(
+            'Common Interface', 
+            (ca.common_interface === 1 ? '✓' : '✗') + ' (' + ca.common_interface + '/1)',
+            'Common Mutation Interface: Checks if a common interface/abstract class/trait exists that defines what a mutation must implement (validation and application logic).',
+            caReasoning.common_interface
+          );
+        }
+        if (caReasoning.per_mutation_implementation !== undefined) {
+          html += detailRowWithTooltip(
+            'Per-Mutation Implementation', 
+            (ca.per_mutation_implementation === 1 ? '✓' : '✗') + ' (' + ca.per_mutation_implementation + '/1)',
+            'Per-Mutation Implementation: Verifies each mutation type has its own implementation of the common interface, in separate files/modules.',
+            caReasoning.per_mutation_implementation
+          );
+        }
+        if (caReasoning.generic_dispatch !== undefined) {
+          html += detailRowWithTooltip(
+            'Generic Dispatch', 
+            (ca.generic_dispatch === 1 ? '✓' : '✗') + ' (' + ca.generic_dispatch + '/1)',
+            'Generic Dispatch: Checks if mutations are resolved by name using a registry/map/dictionary (no if/else chains or switch statements on mutation names in the main loop).',
+            caReasoning.generic_dispatch
+          );
+        }
+        if (caReasoning.extensibility !== undefined) {
+          html += detailRowWithTooltip(
+            'Extensibility', 
+            (ca.extensibility === 1 ? '✓' : '✗') + ' (' + ca.extensibility + '/1)',
+            'Extensibility: Verifies that a new mutation can be added by only implementing the interface and registering it, without modifying core engine code.',
+            caReasoning.extensibility
+          );
+        }
+        html += `</div>`;
+      }
+    }
+    html += `</div>`;
+
+    // Code Quality
+    html += `<div class="detail-section"><h4>Code Quality (${detail.code_quality.points.toFixed(1)}/5)</h4>`;
+    if (detail.code_quality.skipped) {
+      html += `<div class="detail-row"><span class="label" style="color:var(--text-muted)">AI review was skipped</span></div>`;
+    } else {
+      // Show AI summary if available
+      if (detail.code_quality.summary) {
+        html += `<div class="ai-summary-box" style="background:linear-gradient(135deg, var(--bg-expanded) 0%, rgba(79, 140, 255, 0.05) 100%);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;padding:14px;margin-bottom:14px;font-size:12px;line-height:1.6">`;
+        html += `<div style="color:var(--accent);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">`;
+        html += `<span style="font-size:14px">💡</span><span>AI Assessment & Improvement Suggestions</span>`;
+        html += `</div>`;
+        html += `<div style="color:var(--text-primary);white-space:pre-wrap;word-wrap:break-word">${esc(detail.code_quality.summary)}</div>`;
+        html += `</div>`;
+      }
+      const readabilityReasoning = detail.code_quality.reasoning?.readability_and_organization || '';
+      const errorHandlingReasoning = detail.code_quality.reasoning?.error_handling || '';
+      const projectStructureReasoning = detail.code_quality.reasoning?.project_structure || '';
+      
+      html += detailRowWithTooltip(
+        'Readability', 
+        detail.code_quality.readability_and_organization.toFixed(1) + '/2',
+        'Code Readability and Organization: Assesses variable/function naming, code organization, comments, formatting consistency, and overall understandability.',
+        readabilityReasoning
+      );
+      html += detailRowWithTooltip(
+        'Error Handling', 
+        detail.code_quality.error_handling.toFixed(1) + '/1.5',
+        'Error Handling Quality: Evaluates how gracefully the code handles expected errors (validation failures, missing data), error propagation (CRITICAL vs WARNING), unexpected errors, and defensive coding.',
+        errorHandlingReasoning
+      );
+      html += detailRowWithTooltip(
+        'Project Structure', 
+        detail.code_quality.project_structure.toFixed(1) + '/1.5',
+        'Project Structure and Build Setup: Assesses logical directory organization, working Dockerfile, dependency management, clear entry point, and buildability.',
+        projectStructureReasoning
+      );
+    }
+    html += `</div>`;
+
+    html += '</div>'; // details-grid
+    return html;
+  }
+
+  function detailRow(label, value) {
+    return `<div class="detail-row"><span class="label">${label}</span><span class="value">${value}</span></div>`;
+  }
+
+  function detailRowWithTooltip(label, value, tooltipText, reasoning) {
+    const hasReasoning = reasoning && reasoning.trim().length > 0;
+    const tooltipId = 'tooltip-' + Math.random().toString(36).substr(2, 9);
+    let html = `<div class="detail-row">`;
+    html += `<span class="label" style="display:flex;align-items:center;gap:4px">`;
+    html += `${label}`;
+    html += `<span class="tooltip-trigger" data-tooltip-id="${tooltipId}" style="cursor:help;color:var(--accent);font-size:14px" title="${esc(tooltipText)}">ℹ</span>`;
+    html += `</span>`;
+    html += `<span class="value">${value}</span>`;
+    html += `</div>`;
+    
+    if (hasReasoning) {
+      html += `<div class="reasoning-text" style="font-size:11px;color:var(--text-muted);padding-left:12px;margin-top:2px;margin-bottom:6px;line-height:1.4">`;
+      html += `<strong style="color:var(--text-secondary)">Reasoning:</strong> ${esc(reasoning)}`;
+      html += `</div>`;
+    }
+    
+    return html;
+  }
+
+  function bonusRow(label, result) {
+    if (!result) return '';
+    const cls = result.passed ? 'pass' : 'fail';
+    const icon = result.passed ? '&#10003;' : '&#10007;';
+    return `<div class="detail-row"><span class="label">${label}</span><span class="value ${cls}">${icon} ${result.points} pts</span></div>`;
+  }
+
+  // ── Status & countdown ─────────────────────────────────────────
+
+  function setStatus(state, text) {
+    const dot = document.querySelector('#status-indicator .status-dot');
+    dot.className = 'status-dot ' + state;
+    document.getElementById('status-text').textContent = text;
+  }
+
+  function startCountdown() {
+    let remaining = REFRESH_INTERVAL_MS / 1000;
+    const el = document.getElementById('countdown');
+
+    if (countdownTimer) clearInterval(countdownTimer);
+
+    countdownTimer = setInterval(() => {
+      remaining--;
+      if (remaining <= 0) {
+        el.textContent = 'Refreshing...';
+        remaining = REFRESH_INTERVAL_MS / 1000;
+      } else {
+        el.textContent = `Next refresh: ${remaining}s`;
+      }
+    }, 1000);
+
+    el.textContent = `Next refresh: ${remaining}s`;
+  }
+
+  // ── Formatting helpers ─────────────────────────────────────────
+
+  function esc(s) {
+    if (s == null) return '';
+    const d = document.createElement('div');
+    d.textContent = String(s);
+    return d.innerHTML;
+  }
+
+  function fmtMs(ms) {
+    if (ms == null) return 'N/A';
+    if (ms < 1) return ms.toFixed(3) + ' ms';
+    if (ms < 100) return ms.toFixed(2) + ' ms';
+    if (ms < 1000) return ms.toFixed(1) + ' ms';
+    return (ms / 1000).toFixed(2) + ' s';
+  }
+
+  function fmtNum(n) {
+    if (n == null) return 'N/A';
+    return n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  }
+
+  function formatTime(d) {
+    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+
+  function formatDate(d) {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function formatRelative(d) {
+    const now = new Date();
+    const diffMs = now - d;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHr = Math.floor(diffMin / 60);
+
+    if (diffSec < 60) return 'just now';
+    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffHr < 24) return `${diffHr}h ago`;
+    return formatTime(d) + ' ' + formatDate(d);
+  }
+
+  // ── Expand/collapse ────────────────────────────────────────────
+
+  window.toggleExpand = function(row) {
+    row.classList.toggle('expanded');
+  };
+
+  // ── Main loop ──────────────────────────────────────────────────
+
+  async function poll() {
+    const data = await fetchLeaderboard();
+    if (data) {
+      render(data);
+    }
+  }
+
+  async function init() {
+    await poll();
+    startCountdown();
+    setInterval(poll, REFRESH_INTERVAL_MS);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
