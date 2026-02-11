@@ -211,8 +211,8 @@ echo ""
 echo "Creating ${#TEAM_ARRAY[@]} team repositories from template $TEMPLATE:"
 echo ""
 
-# We'll build an updated JSON using jq
-RESULT_JSON="[]"
+# Start with existing teams.json content to preserve all teams
+RESULT_JSON="$TEAMS_JSON"
 
 for TEAM in "${TEAM_ARRAY[@]}"; do
     TEAM=$(echo "$TEAM" | xargs)  # trim whitespace
@@ -242,11 +242,12 @@ for TEAM in "${TEAM_ARRAY[@]}"; do
             echo "  OK    $FULL_REPO (created)"
         else
             echo "  FAIL  $FULL_REPO (creation failed)"
-            # Still add to JSON without repo_url
+            # Update entry without repo_url (or add if doesn't exist)
             RESULT_JSON=$(echo "$RESULT_JSON" | jq \
                 --arg name "$TEAM" \
                 --argjson usernames "$USERNAMES_JSON" \
-                '. + [{"name": $name, "github_usernames": $usernames}]')
+                'map(if .name == $name then . + {"github_usernames": $usernames} else . end) | 
+                 if map(.name == $name) | any then . else . + [{"name": $name, "github_usernames": $usernames}] end')
             continue
         fi
     fi
@@ -260,12 +261,13 @@ for TEAM in "${TEAM_ARRAY[@]}"; do
         echo "          (no github_usernames configured for team $TEAM)"
     fi
 
-    # Add entry to result JSON
+    # Update existing entry or add new one with repo_url
     RESULT_JSON=$(echo "$RESULT_JSON" | jq \
         --arg name "$TEAM" \
         --argjson usernames "$USERNAMES_JSON" \
         --arg url "$REPO_URL" \
-        '. + [{"name": $name, "github_usernames": $usernames, "repo_url": $url}]')
+        'map(if .name == $name then . + {"github_usernames": $usernames, "repo_url": $url} else . end) | 
+         if map(.name == $name) | any then . else . + [{"name": $name, "github_usernames": $usernames, "repo_url": $url}] end')
 done
 
 echo ""
